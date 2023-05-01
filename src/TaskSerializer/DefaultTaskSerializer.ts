@@ -109,7 +109,7 @@ export class DefaultTaskSerializer implements TaskSerializer {
                     priority = ' ' + prioritySymbols.Critical;
                 } else if (task.priority === Priority.High) {
                     priority = ' ' + prioritySymbols.High;
-                }  else if (task.priority === Priority.Normal) {
+                } else if (task.priority === Priority.Normal) {
                     priority = ' ' + prioritySymbols.Normal;
                 } else if (task.priority === Priority.Low) {
                     priority = ' ' + prioritySymbols.Low;
