@@ -397,9 +397,9 @@ For example:
 
 | Global Filter    | Task line                                                                | Text searched by `description`   |
 | ---------------- | ------------------------------------------------------------------------ | -------------------------------- |
-| No global filter | `'- [ ] Do stuff  ⏫  #tag1 ✅ 2022-08-12 #tag2/sub-tag '`               | `'Do stuff #tag1 #tag2/sub-tag'` |
-| `#task`          | `'- [ ] #task Do stuff  ⏫  #tag1 ✅ 2022-08-12 #tag2/sub-tag '`         | `'Do stuff #tag1 #tag2/sub-tag'` |
-| `global-filter`  | `'- [ ] global-filter Do stuff  ⏫  #tag1 ✅ 2022-08-12 #tag2/sub-tag '` | `'Do stuff #tag1 #tag2/sub-tag'` |
+| No global filter | `'- [ ] Do stuff  🔥  #tag1 ✅ 2022-08-12 #tag2/sub-tag '`               | `'Do stuff #tag1 #tag2/sub-tag'` |
+| `#task`          | `'- [ ] #task Do stuff  🔥  #tag1 ✅ 2022-08-12 #tag2/sub-tag '`         | `'Do stuff #tag1 #tag2/sub-tag'` |
+| `global-filter`  | `'- [ ] global-filter Do stuff  🔥  #tag1 ✅ 2022-08-12 #tag2/sub-tag '` | `'Do stuff #tag1 #tag2/sub-tag'` |
 
 ### Priority
 
@@ -407,8 +407,8 @@ For example:
 
 The available priorities are (from high to low):
 
-1. ⏫ for high priority
-2. 🔼 for medium priority
+1. 🔥 for high priority
+2. 🟢 for medium priority
 3. use no signifier to indicate no priority (searched for with 'none')
 4. 🔽 for low priority
 

@@ -194,8 +194,9 @@ Similarly, you can type some fraction of the word `start` (of whatever length is
 | Searchable Text         | Text that is added         |
 | ----------------------- | -------------------------- |
 | ⏎                       | \<new line>                |
-| ⏫ high priority        | ⏫                         |
-| 🔼 medium priority      | 🔼                         |
+| 🔥 critical priority    | 🔥                         |
+| 🚨 high priority        | 🚨                         |
+| 🟢 normal priority      | 🟢                         |
 | 🔽 low priority         | 🔽                         |
 | 🔁 recurring (repeat)   | 🔁                         |
 | every                   | 🔁 every                   |

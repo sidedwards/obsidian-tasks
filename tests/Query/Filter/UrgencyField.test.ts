@@ -49,7 +49,7 @@ describe('sorting by urgency', () => {
         expectTaskComparesBefore(
             sorter,
             with_priority(Priority.High), // Higher priority comes first
-            with_priority(Priority.Medium),
+            with_priority(Priority.Normal),
         );
 
         expectTaskComparesEqual(
@@ -60,8 +60,8 @@ describe('sorting by urgency', () => {
 
         expectTaskComparesBefore(
             sorter,
-            with_priority_and_scheduled(Priority.Medium, '1999-01-12'), // If scheduled date has passed, urgency increases
-            with_priority(Priority.Medium),
+            with_priority_and_scheduled(Priority.Normal, '1999-01-12'), // If scheduled date has passed, urgency increases
+            with_priority(Priority.Normal),
         );
     });
 
@@ -71,7 +71,7 @@ describe('sorting by urgency', () => {
         expectTaskComparesAfter(
             sorter,
             with_priority(Priority.High), // Higher priority comes last
-            with_priority(Priority.Medium),
+            with_priority(Priority.Normal),
         );
     });
 });

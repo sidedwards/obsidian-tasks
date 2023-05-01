@@ -161,7 +161,7 @@ describe('parsing', () => {
 
     it('supports tag anywhere in the description and separates them correctly from signifier emojis', () => {
         // Arrange
-        const line = '- [ ] this is a task due 📅 2021-09-12 #inside_tag ⏫ #some/tags_with_underscore';
+        const line = '- [ ] this is a task due 📅 2021-09-12 #inside_tag 🔥 #some/tags_with_underscore';
 
         // Act
         const task = fromLine({
@@ -180,7 +180,7 @@ describe('parsing', () => {
     it('supports parsing large number of values', () => {
         // Arrange
         const line =
-            '- [ ] Wobble ⏫  #tag1 ✅ 2022-07-02 #tag2  📅 2022-07-02 #tag3 ⏳ 2022-07-02 #tag4 🛫 2022-07-02 #tag5  🔁 every day  #tag6 #tag7 #tag8 #tag9 #tag10';
+            '- [ ] Wobble 🔥  #tag1 ✅ 2022-07-02 #tag2  📅 2022-07-02 #tag3 ⏳ 2022-07-02 #tag4 🛫 2022-07-02 #tag5  🔁 every day  #tag6 #tag7 #tag8 #tag9 #tag10';
 
         // Act
         const task = fromLine({
@@ -1148,8 +1148,8 @@ describe('identicalTo', () => {
     });
 
     it('should check priority', () => {
-        const lhs = new TaskBuilder().priority(Priority.Medium);
-        expect(lhs).toBeIdenticalTo(new TaskBuilder().priority(Priority.Medium));
+        const lhs = new TaskBuilder().priority(Priority.Normal);
+        expect(lhs).toBeIdenticalTo(new TaskBuilder().priority(Priority.Normal));
         expect(lhs).not.toBeIdenticalTo(new TaskBuilder().priority(Priority.None));
     });
 

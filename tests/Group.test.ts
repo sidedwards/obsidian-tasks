@@ -426,23 +426,28 @@ describe('Group names', () => {
         // group by priority
         {
             groupBy: 'priority',
-            taskLine: '- [ ] a ⏫',
-            expectedGroupNames: ['Priority 1: High'],
+            taskLine: '- [ ] a 🔥',
+            expectedGroupNames: ['Priority 1: Critical'],
         },
         {
             groupBy: 'priority',
-            taskLine: '- [ ] a 🔼',
-            expectedGroupNames: ['Priority 2: Medium'],
+            taskLine: '- [ ] a 🚨',
+            expectedGroupNames: ['Priority 2: High'],
+        },
+        {
+            groupBy: 'priority',
+            taskLine: '- [ ] a 🟢',
+            expectedGroupNames: ['Priority 3: Normal'],
         },
         {
             groupBy: 'priority',
             taskLine: '- [ ] a',
-            expectedGroupNames: ['Priority 3: None'],
+            expectedGroupNames: ['Priority 4: None'],
         },
         {
             groupBy: 'priority',
             taskLine: '- [ ] a 🔽',
-            expectedGroupNames: ['Priority 4: Low'],
+            expectedGroupNames: ['Priority 5: Low'],
         },
 
         // -----------------------------------------------------------

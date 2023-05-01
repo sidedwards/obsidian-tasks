@@ -23,7 +23,7 @@ describe.each([{ name: 'emoji', symbols: DEFAULT_SYMBOLS }])("auto-complete with
             { displayText: `${startDateSymbol} start date`, appendText: `${startDateSymbol} ` },
             { displayText: `${scheduledDateSymbol} scheduled date`, appendText: `${scheduledDateSymbol} ` },
             { displayText: `${prioritySymbols.High} high priority`, appendText: `${prioritySymbols.High} ` },
-            { displayText: `${prioritySymbols.Medium} medium priority`, appendText: `${prioritySymbols.Medium} ` },
+            { displayText: `${prioritySymbols.Normal} medium priority`, appendText: `${prioritySymbols.Normal} ` },
         ]);
     });
 
@@ -131,7 +131,7 @@ describe.each([{ name: 'emoji', symbols: DEFAULT_SYMBOLS }])("auto-complete with
             | ${startDateSymbol} start date | ${startDateSymbol}  |
             | ${scheduledDateSymbol} scheduled date | ${scheduledDateSymbol}  |
             | ${prioritySymbols.High} high priority | ${prioritySymbols.High}  |
-            | ${prioritySymbols.Medium} medium priority | ${prioritySymbols.Medium}  |
+            | ${prioritySymbols.Normal} medium priority | ${prioritySymbols.Normal}  |
             | ${prioritySymbols.Low} low priority | ${prioritySymbols.Low}  |
             | ${recurrenceSymbol} recurring (repeat) | ${recurrenceSymbol}  |
             | every | ${recurrenceSymbol} every  |

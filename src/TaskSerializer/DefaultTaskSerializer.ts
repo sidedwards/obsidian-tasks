@@ -13,8 +13,9 @@ import type { TaskDetails, TaskSerializer } from '.';
  */
 export interface DefaultTaskSerializerSymbols {
     readonly prioritySymbols: {
+        Critical: string;
         High: string;
-        Medium: string;
+        Normal: string;
         Low: string;
         None: string;
     };
@@ -41,9 +42,10 @@ export interface DefaultTaskSerializerSymbols {
  */
 export const DEFAULT_SYMBOLS: DefaultTaskSerializerSymbols = {
     prioritySymbols: {
-        High: '⏫',
-        Medium: '🔼',
-        Low: '🔽',
+        Critical: '🔥',
+        High: '🚨',
+        Normal: '🟢',
+        Low: '💤',
         None: '',
     },
     startDateSymbol: '🛫',
@@ -55,7 +57,7 @@ export const DEFAULT_SYMBOLS: DefaultTaskSerializerSymbols = {
     TaskFormatRegularExpressions: {
         // The following regex's end with `$` because they will be matched and
         // removed from the end until none are left.
-        priorityRegex: /([⏫🔼🔽])$/u,
+        priorityRegex: /([🔥🚨🟢💤])$/u,
         startDateRegex: /🛫 *(\d{4}-\d{2}-\d{2})$/u,
         createdDateRegex: /➕ *(\d{4}-\d{2}-\d{2})$/u,
         scheduledDateRegex: /[⏳⌛] *(\d{4}-\d{2}-\d{2})$/u,
@@ -103,10 +105,12 @@ export class DefaultTaskSerializer implements TaskSerializer {
             case 'priority': {
                 let priority: string = '';
 
-                if (task.priority === Priority.High) {
+                if (task.priority === Priority.Critical) {
+                    priority = ' ' + prioritySymbols.Critical;
+                } else if (task.priority === Priority.High) {
                     priority = ' ' + prioritySymbols.High;
-                } else if (task.priority === Priority.Medium) {
-                    priority = ' ' + prioritySymbols.Medium;
+                }  else if (task.priority === Priority.Normal) {
+                    priority = ' ' + prioritySymbols.Normal;
                 } else if (task.priority === Priority.Low) {
                     priority = ' ' + prioritySymbols.Low;
                 }
@@ -186,11 +190,14 @@ export class DefaultTaskSerializer implements TaskSerializer {
                     case prioritySymbols.Low:
                         priority = Priority.Low;
                         break;
-                    case prioritySymbols.Medium:
-                        priority = Priority.Medium;
+                    case prioritySymbols.Normal:
+                        priority = Priority.Normal;
                         break;
                     case prioritySymbols.High:
                         priority = Priority.High;
+                        break;
+                    case prioritySymbols.Critical:
+                        priority = Priority.Critical;
                         break;
                 }
 

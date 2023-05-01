@@ -237,8 +237,9 @@ function getComponentClassesAndData(component: TaskLayoutComponent, task: Task):
             break;
         case 'priority': {
             let priorityValue = null;
-            if (task.priority === taskModule.Priority.High) priorityValue = 'high';
-            else if (task.priority === taskModule.Priority.Medium) priorityValue = 'medium';
+            if (task.priority === taskModule.Priority.Critical) priorityValue = 'critical';
+            else if (task.priority === taskModule.Priority.High) priorityValue = 'high';
+            else if (task.priority === taskModule.Priority.Normal) priorityValue = 'medium';
             else if (task.priority === taskModule.Priority.Low) priorityValue = 'low';
             else priorityValue = 'normal';
             dataAttributes['taskPriority'] = priorityValue;

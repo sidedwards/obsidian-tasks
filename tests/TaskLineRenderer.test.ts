@@ -147,16 +147,16 @@ describe('task line rendering', () => {
 
     it('renders correctly with the default layout options', async () => {
         await testLayoutOptions(
-            '- [ ] Full task ⏫ 📅 2022-07-02 ⏳ 2022-07-03 🛫 2022-07-04 🔁 every day',
+            '- [ ] Full task 🔥 📅 2022-07-02 ⏳ 2022-07-03 🛫 2022-07-04 🔁 every day',
             {},
             'Full task',
-            [' ⏫', ' 🔁 every day', ' 🛫 2022-07-04', ' ⏳ 2022-07-03', ' 📅 2022-07-02'],
+            [' 🔥', ' 🔁 every day', ' 🛫 2022-07-04', ' ⏳ 2022-07-03', ' 📅 2022-07-02'],
         );
     });
 
     it('renders without priority', async () => {
         await testLayoutOptions(
-            '- [ ] Full task ⏫ 📅 2022-07-02 ⏳ 2022-07-03 🛫 2022-07-04 🔁 every day',
+            '- [ ] Full task 🔥 📅 2022-07-02 ⏳ 2022-07-03 🛫 2022-07-04 🔁 every day',
             { hidePriority: true },
             'Full task',
             [' 🔁 every day', ' 🛫 2022-07-04', ' ⏳ 2022-07-03', ' 📅 2022-07-02'],
@@ -165,46 +165,46 @@ describe('task line rendering', () => {
 
     it('renders without created date', async () => {
         await testLayoutOptions(
-            '- [ ] Full task ⏫ 📅 2022-07-02 ⏳ 2022-07-03 🛫 2022-07-04 ➕ 2022-07-05 🔁 every day',
+            '- [ ] Full task 🔥 📅 2022-07-02 ⏳ 2022-07-03 🛫 2022-07-04 ➕ 2022-07-05 🔁 every day',
             { hideCreatedDate: true },
             'Full task',
-            [' ⏫', ' 🔁 every day', ' 🛫 2022-07-04', ' ⏳ 2022-07-03', ' 📅 2022-07-02'],
+            [' 🔥', ' 🔁 every day', ' 🛫 2022-07-04', ' ⏳ 2022-07-03', ' 📅 2022-07-02'],
         );
     });
 
     it('renders without start date', async () => {
         await testLayoutOptions(
-            '- [ ] Full task ⏫ 📅 2022-07-02 ⏳ 2022-07-03 🛫 2022-07-04 🔁 every day',
+            '- [ ] Full task 🔥 📅 2022-07-02 ⏳ 2022-07-03 🛫 2022-07-04 🔁 every day',
             { hideStartDate: true },
             'Full task',
-            [' ⏫', ' 🔁 every day', ' ⏳ 2022-07-03', ' 📅 2022-07-02'],
+            [' 🔥', ' 🔁 every day', ' ⏳ 2022-07-03', ' 📅 2022-07-02'],
         );
     });
 
     it('renders without scheduled date', async () => {
         await testLayoutOptions(
-            '- [ ] Full task ⏫ 📅 2022-07-02 ⏳ 2022-07-03 🛫 2022-07-04 🔁 every day',
+            '- [ ] Full task 🔥 📅 2022-07-02 ⏳ 2022-07-03 🛫 2022-07-04 🔁 every day',
             { hideScheduledDate: true },
             'Full task',
-            [' ⏫', ' 🔁 every day', ' 🛫 2022-07-04', ' 📅 2022-07-02'],
+            [' 🔥', ' 🔁 every day', ' 🛫 2022-07-04', ' 📅 2022-07-02'],
         );
     });
 
     it('renders without due date', async () => {
         await testLayoutOptions(
-            '- [ ] Full task ⏫ 📅 2022-07-02 ⏳ 2022-07-03 🛫 2022-07-04 🔁 every day',
+            '- [ ] Full task 🔥 📅 2022-07-02 ⏳ 2022-07-03 🛫 2022-07-04 🔁 every day',
             { hideDueDate: true },
             'Full task',
-            [' ⏫', ' 🔁 every day', ' 🛫 2022-07-04', ' ⏳ 2022-07-03'],
+            [' 🔥', ' 🔁 every day', ' 🛫 2022-07-04', ' ⏳ 2022-07-03'],
         );
     });
 
     it('renders without recurrence rule', async () => {
         await testLayoutOptions(
-            '- [ ] Full task ⏫ 📅 2022-07-02 ⏳ 2022-07-03 🛫 2022-07-04 🔁 every day',
+            '- [ ] Full task 🔥 📅 2022-07-02 ⏳ 2022-07-03 🛫 2022-07-04 🔁 every day',
             { hideRecurrenceRule: true },
             'Full task',
-            [' ⏫', ' 🛫 2022-07-04', ' ⏳ 2022-07-03', ' 📅 2022-07-02'],
+            [' 🔥', ' 🛫 2022-07-04', ' ⏳ 2022-07-03', ' 📅 2022-07-02'],
         );
     });
 
@@ -218,11 +218,11 @@ describe('task line rendering', () => {
 
     it('renders a done task correctly with the default layout', async () => {
         await testLayoutOptions(
-            '- [x] Full task ✅ 2022-07-05 ⏫ 📅 2022-07-02 ⏳ 2022-07-03 🛫 2022-07-04 ➕ 2022-07-05 🔁 every day',
+            '- [x] Full task ✅ 2022-07-05 🔥 📅 2022-07-02 ⏳ 2022-07-03 🛫 2022-07-04 ➕ 2022-07-05 🔁 every day',
             {},
             'Full task',
             [
-                ' ⏫',
+                ' 🔥',
                 ' 🔁 every day',
                 ' ➕ 2022-07-05',
                 ' 🛫 2022-07-04',
@@ -235,10 +235,10 @@ describe('task line rendering', () => {
 
     it('renders a done task without the done date', async () => {
         await testLayoutOptions(
-            '- [x] Full task ✅ 2022-07-05 ⏫ 📅 2022-07-02 ⏳ 2022-07-03 🛫 2022-07-04 ➕ 2022-07-05 🔁 every day',
+            '- [x] Full task ✅ 2022-07-05 🔥 📅 2022-07-02 ⏳ 2022-07-03 🛫 2022-07-04 ➕ 2022-07-05 🔁 every day',
             { hideDoneDate: true },
             'Full task',
-            [' ⏫', ' 🔁 every day', ' ➕ 2022-07-05', ' 🛫 2022-07-04', ' ⏳ 2022-07-03', ' 📅 2022-07-02'],
+            [' 🔥', ' 🔁 every day', ' ➕ 2022-07-05', ' 🛫 2022-07-04', ' ⏳ 2022-07-03', ' 📅 2022-07-02'],
         );
     });
 
@@ -336,19 +336,19 @@ describe('task line rendering', () => {
 
     it('renders priority with its correct classes', async () => {
         await testComponentClasses(
-            '- [ ] Full task ⏫ 📅 2022-07-02 ⏳ 2022-07-03 🛫 2022-07-04 🔁 every day',
+            '- [ ] Full task 🔥 📅 2022-07-02 ⏳ 2022-07-03 🛫 2022-07-04 🔁 every day',
             {},
             LayoutClasses.priority,
             { taskPriority: 'high' },
         );
         await testComponentClasses(
-            '- [ ] Full task 🔼 📅 2022-07-02 ⏳ 2022-07-03 🛫 2022-07-04 🔁 every day',
+            '- [ ] Full task 🟢 📅 2022-07-02 ⏳ 2022-07-03 🛫 2022-07-04 🔁 every day',
             {},
             LayoutClasses.priority,
             { taskPriority: 'medium' },
         );
         await testComponentClasses(
-            '- [ ] Full task 🔽 📅 2022-07-02 ⏳ 2022-07-03 🛫 2022-07-04 🔁 every day',
+            '- [ ] Full task 💤 📅 2022-07-02 ⏳ 2022-07-03 🛫 2022-07-04 🔁 every day',
             {},
             LayoutClasses.priority,
             { taskPriority: 'low' },
@@ -357,7 +357,7 @@ describe('task line rendering', () => {
 
     it('renders recurrence with its correct classes', async () => {
         await testComponentClasses(
-            '- [ ] Full task ⏫ 📅 2022-07-02 ⏳ 2022-07-03 🛫 2022-07-04 🔁 every day',
+            '- [ ] Full task 🔥 📅 2022-07-02 ⏳ 2022-07-03 🛫 2022-07-04 🔁 every day',
             {},
             LayoutClasses.recurrenceRule,
             {},
@@ -366,14 +366,14 @@ describe('task line rendering', () => {
 
     it('adds a correct "today" CSS class to dates', async () => {
         const today = DateParser.parseDate('today').format(TaskRegularExpressions.dateFormat);
-        await testComponentClasses(`- [ ] Full task ⏫ ➕ ${today}`, {}, LayoutClasses.createdDate, {
+        await testComponentClasses(`- [ ] Full task 🔥 ➕ ${today}`, {}, LayoutClasses.createdDate, {
             taskCreated: 'today',
         });
-        await testComponentClasses(`- [ ] Full task ⏫ 📅 ${today}`, {}, LayoutClasses.dueDate, { taskDue: 'today' });
-        await testComponentClasses(`- [ ] Full task ⏫ ⏳ ${today}`, {}, LayoutClasses.scheduledDate, {
+        await testComponentClasses(`- [ ] Full task 🔥 📅 ${today}`, {}, LayoutClasses.dueDate, { taskDue: 'today' });
+        await testComponentClasses(`- [ ] Full task 🔥 ⏳ ${today}`, {}, LayoutClasses.scheduledDate, {
             taskScheduled: 'today',
         });
-        await testComponentClasses(`- [ ] Full task ⏫ 🛫 ${today}`, {}, LayoutClasses.startDate, {
+        await testComponentClasses(`- [ ] Full task 🔥 🛫 ${today}`, {}, LayoutClasses.startDate, {
             taskStart: 'today',
         });
         await testComponentClasses(`- [x] Done task ✅ ${today}`, {}, LayoutClasses.doneDate, { taskDone: 'today' });
@@ -381,16 +381,16 @@ describe('task line rendering', () => {
 
     it('adds a correct "future-1d" CSS class to dates', async () => {
         const future = DateParser.parseDate('tomorrow').format(TaskRegularExpressions.dateFormat);
-        await testComponentClasses(`- [ ] Full task ⏫ ➕ ${future}`, {}, LayoutClasses.createdDate, {
+        await testComponentClasses(`- [ ] Full task 🔥 ➕ ${future}`, {}, LayoutClasses.createdDate, {
             taskCreated: 'future-1d',
         });
-        await testComponentClasses(`- [ ] Full task ⏫ 📅 ${future}`, {}, LayoutClasses.dueDate, {
+        await testComponentClasses(`- [ ] Full task 🔥 📅 ${future}`, {}, LayoutClasses.dueDate, {
             taskDue: 'future-1d',
         });
-        await testComponentClasses(`- [ ] Full task ⏫ ⏳ ${future}`, {}, LayoutClasses.scheduledDate, {
+        await testComponentClasses(`- [ ] Full task 🔥 ⏳ ${future}`, {}, LayoutClasses.scheduledDate, {
             taskScheduled: 'future-1d',
         });
-        await testComponentClasses(`- [ ] Full task ⏫ 🛫 ${future}`, {}, LayoutClasses.startDate, {
+        await testComponentClasses(`- [ ] Full task 🔥 🛫 ${future}`, {}, LayoutClasses.startDate, {
             taskStart: 'future-1d',
         });
         await testComponentClasses(`- [x] Done task ✅ ${future}`, {}, LayoutClasses.doneDate, {
@@ -400,16 +400,16 @@ describe('task line rendering', () => {
 
     it('adds a correct "future-7d" CSS class to dates', async () => {
         const future = DateParser.parseDate('in 7 days').format(TaskRegularExpressions.dateFormat);
-        await testComponentClasses(`- [ ] Full task ⏫ ➕ ${future}`, {}, LayoutClasses.createdDate, {
+        await testComponentClasses(`- [ ] Full task 🔥 ➕ ${future}`, {}, LayoutClasses.createdDate, {
             taskCreated: 'future-7d',
         });
-        await testComponentClasses(`- [ ] Full task ⏫ 📅 ${future}`, {}, LayoutClasses.dueDate, {
+        await testComponentClasses(`- [ ] Full task 🔥 📅 ${future}`, {}, LayoutClasses.dueDate, {
             taskDue: 'future-7d',
         });
-        await testComponentClasses(`- [ ] Full task ⏫ ⏳ ${future}`, {}, LayoutClasses.scheduledDate, {
+        await testComponentClasses(`- [ ] Full task 🔥 ⏳ ${future}`, {}, LayoutClasses.scheduledDate, {
             taskScheduled: 'future-7d',
         });
-        await testComponentClasses(`- [ ] Full task ⏫ 🛫 ${future}`, {}, LayoutClasses.startDate, {
+        await testComponentClasses(`- [ ] Full task 🔥 🛫 ${future}`, {}, LayoutClasses.startDate, {
             taskStart: 'future-7d',
         });
         await testComponentClasses(`- [x] Done task ✅ ${future}`, {}, LayoutClasses.doneDate, {
@@ -419,14 +419,14 @@ describe('task line rendering', () => {
 
     it('adds a correct "past-1d" CSS class to dates', async () => {
         const past = DateParser.parseDate('yesterday').format(TaskRegularExpressions.dateFormat);
-        await testComponentClasses(`- [ ] Full task ⏫ ➕ ${past}`, {}, LayoutClasses.createdDate, {
+        await testComponentClasses(`- [ ] Full task 🔥 ➕ ${past}`, {}, LayoutClasses.createdDate, {
             taskCreated: 'past-1d',
         });
-        await testComponentClasses(`- [ ] Full task ⏫ 📅 ${past}`, {}, LayoutClasses.dueDate, { taskDue: 'past-1d' });
-        await testComponentClasses(`- [ ] Full task ⏫ ⏳ ${past}`, {}, LayoutClasses.scheduledDate, {
+        await testComponentClasses(`- [ ] Full task 🔥 📅 ${past}`, {}, LayoutClasses.dueDate, { taskDue: 'past-1d' });
+        await testComponentClasses(`- [ ] Full task 🔥 ⏳ ${past}`, {}, LayoutClasses.scheduledDate, {
             taskScheduled: 'past-1d',
         });
-        await testComponentClasses(`- [ ] Full task ⏫ 🛫 ${past}`, {}, LayoutClasses.startDate, {
+        await testComponentClasses(`- [ ] Full task 🔥 🛫 ${past}`, {}, LayoutClasses.startDate, {
             taskStart: 'past-1d',
         });
         await testComponentClasses(`- [x] Done task ✅ ${past}`, {}, LayoutClasses.doneDate, { taskDone: 'past-1d' });
@@ -434,14 +434,14 @@ describe('task line rendering', () => {
 
     it('adds a correct "past-7d" CSS class to dates', async () => {
         const past = DateParser.parseDate('7 days ago').format(TaskRegularExpressions.dateFormat);
-        await testComponentClasses(`- [ ] Full task ⏫ ➕ ${past}`, {}, LayoutClasses.createdDate, {
+        await testComponentClasses(`- [ ] Full task 🔥 ➕ ${past}`, {}, LayoutClasses.createdDate, {
             taskCreated: 'past-7d',
         });
-        await testComponentClasses(`- [ ] Full task ⏫ 📅 ${past}`, {}, LayoutClasses.dueDate, { taskDue: 'past-7d' });
-        await testComponentClasses(`- [ ] Full task ⏫ ⏳ ${past}`, {}, LayoutClasses.scheduledDate, {
+        await testComponentClasses(`- [ ] Full task 🔥 📅 ${past}`, {}, LayoutClasses.dueDate, { taskDue: 'past-7d' });
+        await testComponentClasses(`- [ ] Full task 🔥 ⏳ ${past}`, {}, LayoutClasses.scheduledDate, {
             taskScheduled: 'past-7d',
         });
-        await testComponentClasses(`- [ ] Full task ⏫ 🛫 ${past}`, {}, LayoutClasses.startDate, {
+        await testComponentClasses(`- [ ] Full task 🔥 🛫 ${past}`, {}, LayoutClasses.startDate, {
             taskStart: 'past-7d',
         });
         await testComponentClasses(`- [x] Done task ✅ ${past}`, {}, LayoutClasses.doneDate, { taskDone: 'past-7d' });
@@ -449,66 +449,66 @@ describe('task line rendering', () => {
 
     it('adds the classes "...future-far" and "...past-far" to dates that are further than 7 days', async () => {
         const future = DateParser.parseDate('in 8 days').format(TaskRegularExpressions.dateFormat);
-        await testComponentClasses(`- [ ] Full task ⏫ ➕ ${future}`, {}, LayoutClasses.createdDate, {
+        await testComponentClasses(`- [ ] Full task 🔥 ➕ ${future}`, {}, LayoutClasses.createdDate, {
             taskCreated: 'future-far',
         });
-        await testComponentClasses(`- [ ] Full task ⏫ 📅 ${future}`, {}, LayoutClasses.dueDate, {
+        await testComponentClasses(`- [ ] Full task 🔥 📅 ${future}`, {}, LayoutClasses.dueDate, {
             taskDue: 'future-far',
         });
-        await testComponentClasses(`- [ ] Full task ⏫ ⏳ ${future}`, {}, LayoutClasses.scheduledDate, {
+        await testComponentClasses(`- [ ] Full task 🔥 ⏳ ${future}`, {}, LayoutClasses.scheduledDate, {
             taskScheduled: 'future-far',
         });
-        await testComponentClasses(`- [ ] Full task ⏫ 🛫 ${future}`, {}, LayoutClasses.startDate, {
+        await testComponentClasses(`- [ ] Full task 🔥 🛫 ${future}`, {}, LayoutClasses.startDate, {
             taskStart: 'future-far',
         });
         await testComponentClasses(`- [x] Done task ✅ ${future}`, {}, LayoutClasses.doneDate, {
             taskDone: 'future-far',
         });
         const past = DateParser.parseDate('8 days ago').format(TaskRegularExpressions.dateFormat);
-        await testComponentClasses(`- [ ] Full task ⏫ ➕ ${past}`, {}, LayoutClasses.createdDate, {
+        await testComponentClasses(`- [ ] Full task 🔥 ➕ ${past}`, {}, LayoutClasses.createdDate, {
             taskCreated: 'past-far',
         });
-        await testComponentClasses(`- [ ] Full task ⏫ 📅 ${past}`, {}, LayoutClasses.dueDate, { taskDue: 'past-far' });
-        await testComponentClasses(`- [ ] Full task ⏫ ⏳ ${past}`, {}, LayoutClasses.scheduledDate, {
+        await testComponentClasses(`- [ ] Full task 🔥 📅 ${past}`, {}, LayoutClasses.dueDate, { taskDue: 'past-far' });
+        await testComponentClasses(`- [ ] Full task 🔥 ⏳ ${past}`, {}, LayoutClasses.scheduledDate, {
             taskScheduled: 'past-far',
         });
-        await testComponentClasses(`- [ ] Full task ⏫ 🛫 ${past}`, {}, LayoutClasses.startDate, {
+        await testComponentClasses(`- [ ] Full task 🔥 🛫 ${past}`, {}, LayoutClasses.startDate, {
             taskStart: 'past-far',
         });
         await testComponentClasses(`- [x] Done task ✅ ${past}`, {}, LayoutClasses.doneDate, { taskDone: 'past-far' });
     });
 
     it('does not add specific classes to invalid dates', async () => {
-        await testComponentClasses('- [ ] Full task ⏫ 📅 2023-02-29', {}, LayoutClasses.dueDate, {});
+        await testComponentClasses('- [ ] Full task 🔥 📅 2023-02-29', {}, LayoutClasses.dueDate, {});
     });
 
     it('does not render hidden components but sets their specific classes to the upper li element', async () => {
         await testHiddenComponentClasses(
-            '- [ ] Full task ⏫ 📅 2022-07-02 ⏳ 2022-07-03 🛫 2022-07-04 🔁 every day',
+            '- [ ] Full task 🔥 📅 2022-07-02 ⏳ 2022-07-03 🛫 2022-07-04 🔁 every day',
             { hidePriority: true },
             LayoutClasses.priority,
             { taskPriority: 'high' },
         );
         await testHiddenComponentClasses(
-            '- [ ] Full task ⏫ 📅 2022-07-02 ⏳ 2022-07-03 ➕ 2022-07-04 🔁 every day',
+            '- [ ] Full task 🔥 📅 2022-07-02 ⏳ 2022-07-03 ➕ 2022-07-04 🔁 every day',
             { hideCreatedDate: true },
             LayoutClasses.createdDate,
             { taskCreated: 'past-far' },
         );
         await testHiddenComponentClasses(
-            '- [ ] Full task ⏫ 📅 2022-07-02 ⏳ 2022-07-03 🛫 2022-07-04 🔁 every day',
+            '- [ ] Full task 🔥 📅 2022-07-02 ⏳ 2022-07-03 🛫 2022-07-04 🔁 every day',
             { hideDueDate: true },
             LayoutClasses.dueDate,
             { taskDue: 'past-far' },
         );
         await testHiddenComponentClasses(
-            '- [ ] Full task ⏫ 📅 2022-07-02 ⏳ 2022-07-03 🛫 2022-07-04 🔁 every day',
+            '- [ ] Full task 🔥 📅 2022-07-02 ⏳ 2022-07-03 🛫 2022-07-04 🔁 every day',
             { hideScheduledDate: true },
             LayoutClasses.scheduledDate,
             { taskScheduled: 'past-far' },
         );
         await testHiddenComponentClasses(
-            '- [ ] Full task ⏫ 📅 2022-07-02 ⏳ 2022-07-03 🛫 2022-07-04 🔁 every day',
+            '- [ ] Full task 🔥 📅 2022-07-02 ⏳ 2022-07-03 🛫 2022-07-04 🔁 every day',
             { hideStartDate: true },
             LayoutClasses.startDate,
             { taskStart: 'past-far' },

@@ -1,3 +1,8 @@
+.task-list-item[data-task-priority="critical"] input[type=checkbox] {
+    box-shadow: 0px 0px 2px 2px var(--color-red);
+    border-color: var(--color-red);
+}
+
 .task-list-item[data-task-priority="high"] input[type=checkbox] {
     box-shadow: 0px 0px 2px 2px var(--color-red);
     border-color: var(--color-red);

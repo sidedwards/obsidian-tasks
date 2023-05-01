@@ -100,12 +100,16 @@ function getPossibleComponentSuggestions(
         });
     if (!hasPriority(line)) {
         suggestions.push({
+            displayText: `${symbols.prioritySymbols.Critical} critical priority`,
+            appendText: `${symbols.prioritySymbols.Critical} `,
+        });
+        suggestions.push({
             displayText: `${symbols.prioritySymbols.High} high priority`,
             appendText: `${symbols.prioritySymbols.High} `,
         });
         suggestions.push({
-            displayText: `${symbols.prioritySymbols.Medium} medium priority`,
-            appendText: `${symbols.prioritySymbols.Medium} `,
+            displayText: `${symbols.prioritySymbols.Normal} normal priority`,
+            appendText: `${symbols.prioritySymbols.Normal} `,
         });
         suggestions.push({
             displayText: `${symbols.prioritySymbols.Low} low priority`,

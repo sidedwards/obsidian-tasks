@@ -24,7 +24,7 @@
     let editableTask: {
         description: string;
         status: Status;
-        priority: 'none' | 'low' | 'medium' | 'high';
+        priority: 'none' | 'low' | 'normal' | 'high' | 'critical';
         recurrenceRule: string;
         createdDate: string;
         startDate: string;
@@ -74,16 +74,20 @@
             symbol: prioritySymbols.Low
         }, {
             value: 'none',
-            label: 'Normal',
+            label: 'None',
             symbol: prioritySymbols.None
         }, {
-            value: 'medium',
-            label: 'Medium',
-            symbol: prioritySymbols.Medium
+            value: 'normal',
+            label: 'Normal',
+            symbol: prioritySymbols.Normal
         }, {
             value: 'high',
             label: 'High',
             symbol: prioritySymbols.High
+        }, {
+            value: 'critical',
+            label: 'Critical',
+            symbol: prioritySymbols.Critical
         }]
 
     /*
@@ -218,10 +222,12 @@
         let priority: typeof editableTask.priority = 'none';
         if (task.priority === Priority.Low) {
             priority = 'low';
-        } else if (task.priority === Priority.Medium) {
-            priority = 'medium';
+        } else if (task.priority === Priority.Normal) {
+            priority = 'normal';
         } else if (task.priority === Priority.High) {
             priority = 'high';
+        } else if (task.priority === Priority.Critical) {
+            priority = 'critical';
         }
 
         editableTask = {
@@ -303,11 +309,14 @@
             case 'low':
                 parsedPriority = Priority.Low;
                 break;
-            case 'medium':
-                parsedPriority = Priority.Medium;
+            case 'normal':
+                parsedPriority = Priority.Normal;
                 break;
             case 'high':
                 parsedPriority = Priority.High;
+                break;
+            case 'critical':
+                parsedPriority = Priority.Critical;
                 break;
             default:
                 parsedPriority = Priority.None;

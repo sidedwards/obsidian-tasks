@@ -68,11 +68,14 @@ export class Group {
     private static groupByPriority(task: Task): string[] {
         let priorityName = 'ERROR';
         switch (task.priority) {
+            case Priority.Critical:
+                priorityName = 'Critical';
+                break;
             case Priority.High:
                 priorityName = 'High';
                 break;
-            case Priority.Medium:
-                priorityName = 'Medium';
+            case Priority.Normal:
+                priorityName = 'Normal';
                 break;
             case Priority.None:
                 priorityName = 'None';

@@ -25,11 +25,14 @@ export class PriorityField extends Field {
                 case 'none':
                     filterPriority = Priority.None;
                     break;
-                case 'medium':
-                    filterPriority = Priority.Medium;
+                case 'normal':
+                    filterPriority = Priority.Normal;
                     break;
                 case 'high':
                     filterPriority = Priority.High;
+                    break;
+                case 'critical':
+                    filterPriority = Priority.Critical;
                     break;
             }
 

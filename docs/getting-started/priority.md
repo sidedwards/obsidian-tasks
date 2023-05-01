@@ -25,8 +25,8 @@ has_toc: false
 Tasks can have a priority.
 In order to specify the priority of a task, you can append one of the "priority signifiers", shown here in decreasing order of priority:
 
-1. ⏫ for high priority
-2. 🔼 for medium priority
+1. 🔥 for high priority
+2. 🟢 for medium priority
 3. use no signifier to indicate no priority
 4. 🔽 for low priority
 
@@ -35,7 +35,7 @@ This means that the priority of 🔽 low tasks is considered lower than the prio
 The idea is that you can easily filter out unimportant tasks without needing to assign a priority to all relevant tasks.
 
 ```markdown
-- [ ] take out the trash 🔼
+- [ ] take out the trash 🟢
 ```
 
 ## Easy adding of Priorities

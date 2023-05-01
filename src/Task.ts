@@ -19,10 +19,11 @@ import { compareByDate } from './lib/DateTools';
  * @enum {number}
  */
 export enum Priority {
-    High = '1',
-    Medium = '2',
-    None = '3',
-    Low = '4',
+    Critical = '1',
+    High = '2',
+    Normal = '3',
+    None = '4',
+    Low = '5',
 }
 
 export class TaskRegularExpressions {

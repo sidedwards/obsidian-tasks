@@ -42,5 +42,5 @@ hide priority
 
 ## Tasks for Reference
 
-- [ ] #task Task with high priority ⏫
-- [ ] #task Task with low priority 🔽
+- [ ] #task Task with high priority 🔥
+- [ ] #task Task with low priority 💤

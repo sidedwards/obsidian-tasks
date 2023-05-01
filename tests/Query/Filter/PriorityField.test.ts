@@ -19,7 +19,7 @@ describe('priority is', () => {
     it('priority is high', () => {
         const filter = 'priority is high';
         testTaskFilterForTaskWithPriority(filter, Priority.High, true);
-        testTaskFilterForTaskWithPriority(filter, Priority.Medium, false);
+        testTaskFilterForTaskWithPriority(filter, Priority.Normal, false);
         testTaskFilterForTaskWithPriority(filter, Priority.None, false);
         testTaskFilterForTaskWithPriority(filter, Priority.Low, false);
     });
@@ -27,7 +27,7 @@ describe('priority is', () => {
     it('priority is medium', () => {
         const filter = 'priority is medium';
         testTaskFilterForTaskWithPriority(filter, Priority.High, false);
-        testTaskFilterForTaskWithPriority(filter, Priority.Medium, true);
+        testTaskFilterForTaskWithPriority(filter, Priority.Normal, true);
         testTaskFilterForTaskWithPriority(filter, Priority.None, false);
         testTaskFilterForTaskWithPriority(filter, Priority.Low, false);
     });
@@ -35,7 +35,7 @@ describe('priority is', () => {
     it('priority is none', () => {
         const filter = 'priority is none';
         testTaskFilterForTaskWithPriority(filter, Priority.High, false);
-        testTaskFilterForTaskWithPriority(filter, Priority.Medium, false);
+        testTaskFilterForTaskWithPriority(filter, Priority.Normal, false);
         testTaskFilterForTaskWithPriority(filter, Priority.None, true);
         testTaskFilterForTaskWithPriority(filter, Priority.Low, false);
     });
@@ -43,7 +43,7 @@ describe('priority is', () => {
     it('priority is low', () => {
         const filter = 'priority is low';
         testTaskFilterForTaskWithPriority(filter, Priority.High, false);
-        testTaskFilterForTaskWithPriority(filter, Priority.Medium, false);
+        testTaskFilterForTaskWithPriority(filter, Priority.Normal, false);
         testTaskFilterForTaskWithPriority(filter, Priority.None, false);
         testTaskFilterForTaskWithPriority(filter, Priority.Low, true);
     });
@@ -54,7 +54,7 @@ describe('priority above', () => {
         const filter = 'priority above none';
         testTaskFilterForTaskWithPriority(filter, Priority.Low, false);
         testTaskFilterForTaskWithPriority(filter, Priority.None, false);
-        testTaskFilterForTaskWithPriority(filter, Priority.Medium, true);
+        testTaskFilterForTaskWithPriority(filter, Priority.Normal, true);
         testTaskFilterForTaskWithPriority(filter, Priority.High, true);
     });
 });
@@ -72,10 +72,10 @@ describe('priority is not', () => {
         ['low', Priority.Low, false],
         ['low', Priority.None, true],
         ['none', Priority.None, false],
-        ['none', Priority.Medium, true],
+        ['none', Priority.Normal, true],
         ['medium', Priority.None, true],
-        ['medium', Priority.Medium, false],
-        ['high', Priority.Medium, true],
+        ['medium', Priority.Normal, false],
+        ['high', Priority.Normal, true],
         ['high', Priority.High, false],
     ])('priority is not %s (with %s)', (filter: string, input: Priority, expected: boolean) => {
         // TODO Use name of input priority instead of
@@ -141,8 +141,8 @@ describe('sorting by priority', () => {
         // Assert
         // This tests each adjacent pair of priority values, in descending order,
         // to prove that sorting of all combinations will be correct.
-        expectTaskComparesBefore(sorter, with_priority(Priority.High), with_priority(Priority.Medium));
-        expectTaskComparesBefore(sorter, with_priority(Priority.Medium), with_priority(Priority.None));
+        expectTaskComparesBefore(sorter, with_priority(Priority.High), with_priority(Priority.Normal));
+        expectTaskComparesBefore(sorter, with_priority(Priority.Normal), with_priority(Priority.None));
         expectTaskComparesBefore(sorter, with_priority(Priority.None), with_priority(Priority.Low));
 
         expectTaskComparesEqual(sorter, with_priority(Priority.None), with_priority(Priority.None));
@@ -152,6 +152,6 @@ describe('sorting by priority', () => {
         // Single example just to prove reverse works.
         // (There's no need to repeat all the examples above)
         const sorter = new PriorityField().createReverseSorter();
-        expectTaskComparesAfter(sorter, with_priority(Priority.High), with_priority(Priority.Medium));
+        expectTaskComparesAfter(sorter, with_priority(Priority.High), with_priority(Priority.Normal));
     });
 });
