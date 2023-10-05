@@ -194,7 +194,7 @@ describe('Query parsing', () => {
             const queryString = `(${filter}) OR NOT (${filter})`;
             const query = new Query(queryString);
 
-            const taskLine = '- [ ] this is a task due 📅 2021-09-12 #inside_tag ⏫ #some/tags_with_underscore';
+            const taskLine = '- [ ] this is a task due 📅 2021-09-12 #inside_tag 🔥 #some/tags_with_underscore';
             const task = fromLine({
                 line: taskLine,
             });

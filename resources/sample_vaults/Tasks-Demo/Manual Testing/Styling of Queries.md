@@ -74,6 +74,13 @@ hide backlink
 
 ## Tasks for Reference
 
+<<<<<<< HEAD
+
 - [ ] #task Task with high priority ⏫
 - [ ] #task Task with low priority 🔽
 - [ ] #task I have a tag to make my description red #todo/strategic
+=======
+- [ ] #task Task with high priority 🔥
+- [ ] #task Task with low priority 💤
+
+>>>>>>> 10584e01 (Task customizations)

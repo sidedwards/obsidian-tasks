@@ -25,12 +25,12 @@ import { PriorityTools } from './lib/PriorityTools';
  * @enum {number}
  */
 export enum Priority {
-    Highest = '0',
+    Critical = '0',
     High = '1',
-    Medium = '2',
+    Normal = '2',
     None = '3',
     Low = '4',
-    Lowest = '5',
+    Wishlist = '5',
 }
 
 export class TaskRegularExpressions {

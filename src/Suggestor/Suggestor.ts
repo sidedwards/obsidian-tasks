@@ -89,20 +89,20 @@ function addTaskPropertySuggestions(
             appendText: `${symbols.prioritySymbols.High} `,
         });
         genericSuggestions.push({
-            displayText: `${symbols.prioritySymbols.Medium} medium priority`,
-            appendText: `${symbols.prioritySymbols.Medium} `,
+            displayText: `${symbols.prioritySymbols.Normal} normal priority`,
+            appendText: `${symbols.prioritySymbols.Normal} `,
         });
         genericSuggestions.push({
             displayText: `${symbols.prioritySymbols.Low} low priority`,
             appendText: `${symbols.prioritySymbols.Low} `,
         });
         genericSuggestions.push({
-            displayText: `${symbols.prioritySymbols.Highest} highest priority`,
-            appendText: `${symbols.prioritySymbols.Highest} `,
+            displayText: `${symbols.prioritySymbols.Critical} critical priority`,
+            appendText: `${symbols.prioritySymbols.Critical} `,
         });
         genericSuggestions.push({
-            displayText: `${symbols.prioritySymbols.Lowest} lowest priority`,
-            appendText: `${symbols.prioritySymbols.Lowest} `,
+            displayText: `${symbols.prioritySymbols.Wishlist} wishlist priority`,
+            appendText: `${symbols.prioritySymbols.Wishlist} `,
         });
     }
     if (!line.includes(symbols.recurrenceSymbol))

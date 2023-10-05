@@ -12,7 +12,7 @@ export class PriorityField extends Field {
     //  (leading-white-space-in-outer-capture-group(values-to-use-are-in-inner-capture-group))
     // The capture groups are numbered in the order of their opening brackets, from left to right.
     private static readonly priorityRegexp =
-        /^priority(\s+is)?(\s+(above|below|not))?(\s+(lowest|low|none|medium|high|highest))$/;
+        /^priority(\s+is)?(\s+(above|below|not))?(\s+(wishlist|low|none|normal|high|critical))$/;
 
     createFilterOrErrorMessage(line: string): FilterOrErrorMessage {
         const priorityMatch = Field.getMatch(this.filterRegExp(), line);
@@ -21,8 +21,8 @@ export class PriorityField extends Field {
             let filterPriority: Priority | null = null;
 
             switch (filterPriorityString) {
-                case 'lowest':
-                    filterPriority = Priority.Lowest;
+                case 'wishlist':
+                    filterPriority = Priority.Wishlist;
                     break;
                 case 'low':
                     filterPriority = Priority.Low;
@@ -30,14 +30,14 @@ export class PriorityField extends Field {
                 case 'none':
                     filterPriority = Priority.None;
                     break;
-                case 'medium':
-                    filterPriority = Priority.Medium;
+                case 'normal':
+                    filterPriority = Priority.Normal;
                     break;
                 case 'high':
                     filterPriority = Priority.High;
                     break;
-                case 'highest':
-                    filterPriority = Priority.Highest;
+                case 'critical':
+                    filterPriority = Priority.Critical;
                     break;
             }
 
