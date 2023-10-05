@@ -11,6 +11,7 @@ import {
     expectTaskComparesBefore,
     expectTaskComparesEqual,
 } from '../../CustomMatchers/CustomMatchersForSorting';
+import { fromLine } from '../../TestHelpers';
 
 window.moment = moment;
 
@@ -73,5 +74,41 @@ describe('sorting by urgency', () => {
             with_priority(Priority.High), // Higher priority comes last
             with_priority(Priority.Medium),
         );
+    });
+});
+
+describe('grouping by urgency', () => {
+    it('supports grouping methods correctly', () => {
+        expect(new UrgencyField()).toSupportGroupingWithProperty('urgency');
+    });
+
+    // Numbers taken from:
+    // https://publish.obsidian.md/tasks/Advanced/Urgency
+    it.each([
+        ['- [ ] a ⏫', ['6.00']],
+        ['- [ ] a 🔼', ['3.90']],
+        ['- [ ] a', ['1.95']],
+        ['- [ ] a 🔽', ['0.00']],
+    ])('task "%s" should have groups: %s', (taskLine: string, groups: string[]) => {
+        // Arrange
+        const grouper = new UrgencyField().createNormalGrouper().grouper;
+
+        // Assert
+        expect(grouper(fromLine({ line: taskLine }))).toEqual(groups);
+    });
+
+    describe('should sort groups for UrgencyField', () => {
+        const taskLines = ['- [ ] a ⏫', '- [ ] a 🔼', '- [ ] a', '- [ ] a 🔽'];
+        const tasks = taskLines.map((taskLine) => fromLine({ line: taskLine }));
+
+        it('highest urgency first with normal grouper', () => {
+            const grouper = new UrgencyField().createNormalGrouper();
+            expect({ grouper, tasks }).groupHeadingsToBe(['0.00', '1.95', '3.90', '6.00'].reverse());
+        });
+
+        it('lowest urgency first with reverse grouper', () => {
+            const grouper = new UrgencyField().createReverseGrouper();
+            expect({ grouper, tasks }).groupHeadingsToBe(['0.00', '1.95', '3.90', '6.00']);
+        });
     });
 });

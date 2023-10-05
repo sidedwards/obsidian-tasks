@@ -21,15 +21,11 @@ Once you're comfortable with the background information in this page, further in
 
 - [[Style custom statuses|How to style custom statuses]].
 - [[Set up custom statuses|How to set up your custom statuses]].
-- [[Status Collections]].
-
----
+- [[About Status Collections]].
 
 ## Do I need to set up statuses?
 
 If you are happy with all your tasks beginning with `[ ]` and `[x]`, then **no**, you can just ignore Tasks' Statuses facility.
-
----
 
 ## About Statuses
 
@@ -94,8 +90,6 @@ It is the Task Status Type changing **from** `DONE` that controls when:
 
 - tasks **lose** their Done dates (if Done dates are enabled in settings).
 
----
-
 ## What can Statuses do?
 
 Now we have seen what is in a Status, what can we do with them?
@@ -103,8 +97,6 @@ Now we have seen what is in a Status, what can we do with them?
 We can use them to control what Tasks does when a task's checkbox is clicked, or toggled.
 
 The [[Example Statuses]] page has a variety of examples, for inspiration.
-
----
 
 ## More about Statuses
 
@@ -146,7 +138,7 @@ What Tasks' custom statuses allow you to do is to **also customise the behaviour
 
 ### Setting up Custom Statuses
 
-<!-- force a blank line --> <!-- include: snippet-statuses-overview.md -->
+<!-- force a blank line --><!-- include: snippet-statuses-overview.md -->
 
 > [!info]
 > Broad steps to understand and set up Statuses (or "Alternate Checkboxes"):
@@ -155,7 +147,7 @@ What Tasks' custom statuses allow you to do is to **also customise the behaviour
 >   - [[Statuses]]
 >   - [[Custom Statuses]]
 > - Choose your status styling scheme: this will determine the names and symbols for your custom statuses:
->   - Some common ones are shown in [[Status Collections]]
+>   - Some common ones are shown in [[About Status Collections]]
 > - Set up your status styling scheme
 >   - [[Style custom statuses|How to style custom statuses]].
 > - Configure Tasks to use your custom statuses
@@ -163,9 +155,7 @@ What Tasks' custom statuses allow you to do is to **also customise the behaviour
 > - Optionally, update your tasks searches to take advantage of the new flexibility
 >   - [[Filters#Filters for Task Statuses|Filters for Task Statuses]]
 
-<!-- force a blank line --> <!-- endInclude -->
-
----
+<!-- force a blank line --><!-- endInclude -->
 
 ## Using Statuses
 
@@ -196,8 +186,6 @@ For details, see [[Filters#Filters for Task Statuses|Filters for Task Statuses]]
 
 > [!info]
 We envisage adding `status.symbol`. We are tracking this in [issue #1630](https://github.com/obsidian-tasks-group/obsidian-tasks/issues/1630).
-
----
 
 ## Credit: Sytone and the 'Tasks SQL Powered' plugin
 

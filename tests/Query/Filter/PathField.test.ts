@@ -1,5 +1,5 @@
 import { PathField } from '../../../src/Query/Filter/PathField';
-import type { FilterOrErrorMessage } from '../../../src/Query/Filter/Filter';
+import type { FilterOrErrorMessage } from '../../../src/Query/Filter/FilterOrErrorMessage';
 import { TaskBuilder } from '../../TestingTools/TaskBuilder';
 import { testFilter } from '../../TestingTools/FilterTestHelpers';
 import {
@@ -7,7 +7,7 @@ import {
     expectTaskComparesBefore,
     expectTaskComparesEqual,
 } from '../../CustomMatchers/CustomMatchersForSorting';
-import { fromLine } from '../../TestHelpers';
+import { SampleTasks, fromLine } from '../../TestHelpers';
 
 function testTaskFilterForTaskWithPath(filter: FilterOrErrorMessage, path: string, expected: boolean) {
     const builder = new TaskBuilder();
@@ -76,33 +76,18 @@ describe('path', () => {
     });
 });
 
-describe('invalid unescaped slash should give helpful error text and not search', () => {
+describe('should use whole path with un-escaped slashes in query', () => {
     const filterWithUnescapedSlashes = new PathField().createFilterOrErrorMessage(
         String.raw`path regex matches /a/b/c/d/`,
     );
 
-    // This test demonstrates the issue logged in
-    // https://github.com/obsidian-tasks-group/obsidian-tasks/issues/1037
-    //      'Work out how to prevent `path regex matches /a/b/c/d/` from
-    //       confusingly only searching `path regex matches /a/`.
-    // All these tests are marked as 'failing' because the code currently accepts
-    // an invalid search.
-    it.failing('should not be valid', () => {
-        expect(filterWithUnescapedSlashes).not.toBeValid();
+    it('should escape forward slashes in query automatically', () => {
+        expect(filterWithUnescapedSlashes).toBeValid();
+        expect(filterWithUnescapedSlashes).toHaveExplanation("using regex:     'a\\/b\\/c\\/d' with no flags");
     });
 
-    it.failing('should have a meaningful error message', () => {
-        // The error message does not have to be exactly this.
-        // The main thing is that it should convey what the user needs to do
-        // to fix the expression.
-        expect(filterWithUnescapedSlashes.error).toEqual(
-            'An unescaped delimiter must be escaped; in most languages with a backslash (\\)',
-        );
-    });
-
-    it.failing('should not match a subset of requested path', () => {
-        // Once the issue is fixed, and filterWithUnescapedSlashes is not valid,
-        // this test should be deleted.
+    it('should match the requested path', () => {
+        expect(filterWithUnescapedSlashes).toMatchTaskWithPath('/a/b/c/d/e.md');
         expect(filterWithUnescapedSlashes).not.toMatchTaskWithPath('/a/b.md');
     });
 });
@@ -158,9 +143,26 @@ describe('grouping by path', () => {
         ['- [ ] a', 'a\\b\\c.md', ['a\\\\b\\\\c']],
     ])('task "%s" with path "%s" should have groups: %s', (taskLine: string, path: string, groups: string[]) => {
         // Arrange
-        const grouper = new PathField().createGrouper().grouper;
+        const grouper = new PathField().createNormalGrouper().grouper;
 
         // Assert
         expect(grouper(fromLine({ line: taskLine, path: path }))).toEqual(groups);
+    });
+
+    it('should sort groups for PathField', () => {
+        // Arrange
+        const tasks = SampleTasks.withAllRootsPathsHeadings();
+        const grouper = new PathField().createNormalGrouper();
+
+        // Assert
+        expect({ grouper, tasks }).groupHeadingsToBe([
+            // Why there is no path for empty path?
+            'a/b',
+            'a/b/\\_c\\_',
+            'a/b/c',
+            'a/d/c',
+            'a\\_b\\_c',
+            'e/d/c',
+        ]);
     });
 });

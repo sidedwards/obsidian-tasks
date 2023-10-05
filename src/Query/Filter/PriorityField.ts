@@ -3,23 +3,27 @@ import { Explanation } from '../Explain/Explanation';
 import type { Comparator } from '../Sorter';
 import type { GrouperFunction } from '../Grouper';
 import { Field } from './Field';
-import { Filter, FilterOrErrorMessage } from './Filter';
+import { Filter } from './Filter';
+import { FilterOrErrorMessage } from './FilterOrErrorMessage';
 
 export class PriorityField extends Field {
     // The trick in the following to manage whitespace with optional values
     // is to capture them in Nested Capture Groups, like this:
     //  (leading-white-space-in-outer-capture-group(values-to-use-are-in-inner-capture-group))
     // The capture groups are numbered in the order of their opening brackets, from left to right.
-    private static readonly priorityRegexp = /^priority(\s+is)?(\s+(above|below|not))?(\s+(low|none|medium|high))$/;
+    private static readonly priorityRegexp =
+        /^priority(\s+is)?(\s+(above|below|not))?(\s+(lowest|low|none|medium|high|highest))$/;
 
     createFilterOrErrorMessage(line: string): FilterOrErrorMessage {
-        const result = new FilterOrErrorMessage(line);
         const priorityMatch = Field.getMatch(this.filterRegExp(), line);
         if (priorityMatch !== null) {
             const filterPriorityString = priorityMatch[5];
             let filterPriority: Priority | null = null;
 
             switch (filterPriorityString) {
+                case 'lowest':
+                    filterPriority = Priority.Lowest;
+                    break;
                 case 'low':
                     filterPriority = Priority.Low;
                     break;
@@ -32,11 +36,13 @@ export class PriorityField extends Field {
                 case 'high':
                     filterPriority = Priority.High;
                     break;
+                case 'highest':
+                    filterPriority = Priority.Highest;
+                    break;
             }
 
             if (filterPriority === null) {
-                result.error = 'do not understand priority';
-                return result;
+                return FilterOrErrorMessage.fromError(line, 'do not understand priority');
             }
 
             let explanation = line;
@@ -56,11 +62,10 @@ export class PriorityField extends Field {
                     explanation = `${this.fieldName()} is ${filterPriorityString}`;
             }
 
-            result.filter = new Filter(line, filter, new Explanation(explanation));
+            return FilterOrErrorMessage.fromFilter(new Filter(line, filter, new Explanation(explanation)));
         } else {
-            result.error = 'do not understand query filter (priority)';
+            return FilterOrErrorMessage.fromError(line, 'do not understand query filter (priority)');
         }
-        return result;
     }
 
     public fieldName(): string {
@@ -87,22 +92,7 @@ export class PriorityField extends Field {
 
     public grouper(): GrouperFunction {
         return (task: Task) => {
-            let priorityName = 'ERROR';
-            switch (task.priority) {
-                case Priority.High:
-                    priorityName = 'High';
-                    break;
-                case Priority.Medium:
-                    priorityName = 'Medium';
-                    break;
-                case Priority.None:
-                    priorityName = 'None';
-                    break;
-                case Priority.Low:
-                    priorityName = 'Low';
-                    break;
-            }
-            return [`Priority ${task.priority}: ${priorityName}`];
+            return [task.priorityNameGroupText];
         };
     }
 }

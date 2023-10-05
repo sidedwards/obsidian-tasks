@@ -7,8 +7,9 @@ import type { Comparator } from '../Sorter';
 import { compareByDate } from '../../lib/DateTools';
 import type { GrouperFunction } from '../Grouper';
 import { Field } from './Field';
-import { Filter, type FilterFunction, FilterOrErrorMessage } from './Filter';
+import { Filter, type FilterFunction } from './Filter';
 import { FilterInstructions } from './FilterInstructions';
+import { FilterOrErrorMessage } from './FilterOrErrorMessage';
 
 export type DateFilterFunction = (date: Moment | null) => boolean;
 
@@ -49,45 +50,45 @@ export abstract class DateField extends Field {
             return filterResult;
         }
 
-        const result = new FilterOrErrorMessage(line);
-
         const fieldNameKeywordDate = Field.getMatch(this.filterRegExp(), line);
-        if (fieldNameKeywordDate !== null) {
-            const keywordAndDateString = fieldNameKeywordDate[1]; // Will contain the whole line except the field name
-            const fieldKeyword = fieldNameKeywordDate[2]; // Will be 'before', 'after', 'in', 'on' or undefined
-            const fieldDateString = fieldNameKeywordDate[3]; // Will contain the remainder of the instruction
-
-            // Try interpreting everything after the keyword as a date range:
-            let fieldDates = DateParser.parseDateRange(fieldDateString);
-
-            // If the date range parsing failed, try again to parse the whole line except the field name
-            // as a single date, using the pre-date-ranges parsing mechanism.
-            // This is needed to keep 'due in two weeks' working, as 'two weeks' is not actually a valid date range
-            // if the futureDates value passed in to chrono's parsing functions is false.
-            if (!fieldDates.isValid()) {
-                const date = DateParser.parseDate(keywordAndDateString);
-                if (date.isValid()) {
-                    fieldDates = new DateRange(date, date);
-                }
-            }
-
-            if (!fieldDates.isValid()) {
-                result.error = 'do not understand ' + this.fieldName() + ' date';
-            } else {
-                const filterFunction = this.buildFilterFunction(fieldKeyword, fieldDates);
-
-                const explanation = DateField.buildExplanation(
-                    this.fieldNameForExplanation(),
-                    fieldKeyword,
-                    this.filterResultIfFieldMissing(),
-                    fieldDates,
-                );
-                result.filter = new Filter(line, filterFunction, explanation);
-            }
-        } else {
-            result.error = 'do not understand query filter (' + this.fieldName() + ' date)';
+        if (fieldNameKeywordDate === null) {
+            return FilterOrErrorMessage.fromError(
+                line,
+                'do not understand query filter (' + this.fieldName() + ' date)',
+            );
         }
-        return result;
+
+        const keywordAndDateString = fieldNameKeywordDate[1]; // The whole line except the field name
+        const fieldKeyword = fieldNameKeywordDate[2]; // 'on', 'in', 'before', 'after', 'on|in or before|after' or undefined
+        const fieldDateString = fieldNameKeywordDate[3]; // The remainder of the instruction
+
+        // Try interpreting everything after the keyword as a date range:
+        let fieldDates = DateParser.parseDateRange(fieldDateString);
+
+        // If the date range parsing failed, try again to parse the whole line except the field name
+        // as a single date, using the pre-date-ranges parsing mechanism.
+        // This is needed to keep 'due in two weeks' working, as 'two weeks' is not actually a valid date range
+        // if the futureDates value passed in to chrono's parsing functions is false.
+        if (!fieldDates.isValid()) {
+            const date = DateParser.parseDate(keywordAndDateString);
+            if (date.isValid()) {
+                fieldDates = new DateRange(date, date);
+            }
+        }
+
+        if (!fieldDates.isValid()) {
+            return FilterOrErrorMessage.fromError(line, 'do not understand ' + this.fieldName() + ' date');
+        }
+
+        const filterFunction = this.buildFilterFunction(fieldKeyword, fieldDates);
+
+        const explanation = DateField.buildExplanation(
+            this.fieldNameForExplanation(),
+            fieldKeyword,
+            this.filterResultIfFieldMissing(),
+            fieldDates,
+        );
+        return FilterOrErrorMessage.fromFilter(new Filter(line, filterFunction, explanation));
     }
 
     /**
@@ -98,15 +99,33 @@ export abstract class DateField extends Field {
      */
     protected buildFilterFunction(fieldKeyword: string, fieldDates: DateRange): FilterFunction {
         let dateFilter: DateFilterFunction;
-        if (fieldKeyword === 'before') {
-            dateFilter = (date) => (date ? date.isBefore(fieldDates.start) : this.filterResultIfFieldMissing());
-        } else if (fieldKeyword === 'after') {
-            dateFilter = (date) => (date ? date.isAfter(fieldDates.end) : this.filterResultIfFieldMissing());
-        } else {
-            dateFilter = (date) =>
-                date
-                    ? date.isSameOrAfter(fieldDates.start) && date.isSameOrBefore(fieldDates.end)
-                    : this.filterResultIfFieldMissing();
+        switch (fieldKeyword) {
+            case 'before':
+                dateFilter = (date) => (date ? date.isBefore(fieldDates.start) : this.filterResultIfFieldMissing());
+                break;
+            case 'after':
+                dateFilter = (date) => (date ? date.isAfter(fieldDates.end) : this.filterResultIfFieldMissing());
+                break;
+            case 'on or before':
+            case 'in or before':
+                // 'on or before'/'in or before' a date range uses the end of the range
+                // as the search limit, so that it matches every date in the
+                // inclusive date range, and all dates before the range.
+                dateFilter = (date) => (date ? date.isSameOrBefore(fieldDates.end) : this.filterResultIfFieldMissing());
+                break;
+            case 'on or after':
+            case 'in or after':
+                // 'on or after'/'in or after' a date range uses the beginning of the range
+                // as the search limit, so that it matches every date in the
+                // inclusive date range, and all dates after the range.
+                dateFilter = (date) =>
+                    date ? date.isSameOrAfter(fieldDates.start) : this.filterResultIfFieldMissing();
+                break;
+            default:
+                dateFilter = (date) =>
+                    date
+                        ? date.isSameOrAfter(fieldDates.start) && date.isSameOrBefore(fieldDates.end)
+                        : this.filterResultIfFieldMissing();
         }
         return this.getFilter(dateFilter);
     }
@@ -118,7 +137,9 @@ export abstract class DateField extends Field {
     }
 
     protected filterRegExp(): RegExp {
-        return new RegExp(`^${this.fieldNameForFilterInstruction()} ((before|after|on|in)? ?(.*))`);
+        return new RegExp(
+            `^${this.fieldNameForFilterInstruction()} (((?:on|in) or before|before|(?:on|in) or after|after|on|in)? ?(.*))`,
+        );
     }
 
     /**
@@ -148,24 +169,35 @@ export abstract class DateField extends Field {
         filterResultIfFieldMissing: boolean,
         filterDates: DateRange,
     ): Explanation {
-        let relationship;
+        let relationship = fieldKeyword;
         // Example of formatted date: '2024-01-02 (Tuesday 2nd January 2024)'
         const dateFormat = 'YYYY-MM-DD (dddd Do MMMM YYYY)';
         let explanationDates;
         switch (fieldKeyword) {
             case 'before':
-                relationship = fieldKeyword;
+            case 'on or after':
+                // 'before <date range>' and 'on or after <date range>' reference the Start of the range:
+                //  - 'before this week' is before the Monday
+                //  - 'on or after this week' is starting from Monday inclusive.
                 explanationDates = filterDates.start.format(dateFormat);
                 break;
             case 'after':
-                relationship = fieldKeyword;
+            case 'on or before':
+                // 'after <date range>' and 'on or before <date range>' reference the End of the range:
+                //  - 'after this month' is after the last day of this month
+                //  - 'on or before this month' is before the last day of this month inclusive.
                 explanationDates = filterDates.end.format(dateFormat);
                 break;
+            case 'in or before':
+                relationship = 'on or before';
+                explanationDates = filterDates.end.format(dateFormat);
+                break;
+            case 'in or after':
+                relationship = 'on or after';
+                explanationDates = filterDates.start.format(dateFormat);
+                break;
             default:
-                if (filterDates.start.isSame(filterDates.end)) {
-                    relationship = 'on';
-                    explanationDates = filterDates.start.format(dateFormat);
-                } else {
+                if (!filterDates.start.isSame(filterDates.end)) {
                     // This is a special case where a multi-line explanation has to be built
                     // All other cases need only one line
                     const firstLine = `${fieldName} date is between:`;
@@ -183,6 +215,9 @@ export abstract class DateField extends Field {
 
                     return new Explanation(firstLine, subExplanations);
                 }
+
+                relationship = 'on';
+                explanationDates = filterDates.start.format(dateFormat);
                 break;
         }
 

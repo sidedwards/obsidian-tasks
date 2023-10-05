@@ -7,6 +7,7 @@
     import { Status } from '../Status';
     import { Priority, Task } from '../Task';
     import { doAutocomplete } from '../DateAbbreviations';
+    import { TasksDate } from '../Scripting/TasksDate';
 
     // These exported variables are passed in as props by TaskModal.onOpen():
     export let task: Task;
@@ -25,7 +26,7 @@
     let editableTask: {
         description: string;
         status: Status;
-        priority: 'none' | 'low' | 'medium' | 'high';
+        priority: 'none' | 'lowest' | 'low' | 'medium' | 'high' | 'highest';
         recurrenceRule: string;
         createdDate: string;
         startDate: string;
@@ -68,23 +69,45 @@
     const priorityOptions: {
             value: typeof editableTask.priority,
             label: string,
-            symbol: string }[] =
+            symbol: string,
+            accessKey: string,
+            accessKeyIndex: number}[] =
         [{
+            value: 'lowest',
+            label: 'Lowest',
+            symbol: prioritySymbols.Lowest,
+            accessKey: 'o',
+            accessKeyIndex: 1
+        }, {
             value: 'low',
             label: 'Low',
-            symbol: prioritySymbols.Low
+            symbol: prioritySymbols.Low,
+            accessKey: 'l',
+            accessKeyIndex: 0
         }, {
             value: 'none',
             label: 'Normal',
-            symbol: prioritySymbols.None
+            symbol: prioritySymbols.None,
+            accessKey: 'n',
+            accessKeyIndex: 0
         }, {
             value: 'medium',
             label: 'Medium',
-            symbol: prioritySymbols.Medium
+            symbol: prioritySymbols.Medium,
+            accessKey: 'm',
+            accessKeyIndex: 0
         }, {
             value: 'high',
             label: 'High',
-            symbol: prioritySymbols.High
+            symbol: prioritySymbols.High,
+            accessKey: 'h',
+            accessKeyIndex: 0
+        }, {
+            value: 'highest',
+            label: 'Highest',
+            symbol: prioritySymbols.Highest,
+            accessKey: 'i',
+            accessKeyIndex: 1
         }]
 
     /*
@@ -194,6 +217,9 @@
             if (!recurrenceFromText) {
                 parsedRecurrence = '<i>invalid recurrence rule</i>';
                 isRecurrenceValid = false;
+            } else if (!editableTask.startDate && !editableTask.scheduledDate && !editableTask.dueDate) {
+                parsedRecurrence = '<i>due/scheduled/start date needs to be set</i>';
+                isRecurrenceValid = false;
             } else {
                 parsedRecurrence = recurrenceFromText;
             }
@@ -208,20 +234,24 @@
     onMount(() => {
         const { provideAccessKeys } = getSettings();
         withAccessKeys = provideAccessKeys;
-        const description = GlobalFilter.removeAsWordFrom(task.description);
+        const description = GlobalFilter.getInstance().removeAsWordFrom(task.description);
         // If we're displaying to the user the description without the global filter (i.e. it was removed in the method
         // above), or if the description did not include a global filter in the first place, we'll add the global filter
         // when saving the task.
-        if (description != task.description || !GlobalFilter.includedIn(task.description)) {
+        if (description != task.description || !GlobalFilter.getInstance().includedIn(task.description)) {
             addGlobalFilterOnSave = true;
         }
         let priority: typeof editableTask.priority = 'none';
-        if (task.priority === Priority.Low) {
+        if (task.priority === Priority.Lowest) {
+            priority = 'lowest';
+        } else if (task.priority === Priority.Low) {
             priority = 'low';
         } else if (task.priority === Priority.Medium) {
             priority = 'medium';
         } else if (task.priority === Priority.High) {
             priority = 'high';
+        } else if (task.priority === Priority.Highest) {
+            priority = 'highest';
         }
 
         editableTask = {
@@ -229,17 +259,11 @@
             status: task.status,
             priority,
             recurrenceRule: task.recurrence ? task.recurrence.toText() : '',
-            createdDate: task.createdDate
-                ? task.createdDate.format('YYYY-MM-DD')
-                : '',
-            startDate: task.startDate
-                ? task.startDate.format('YYYY-MM-DD')
-                : '',
-            scheduledDate: task.scheduledDate
-                ? task.scheduledDate.format('YYYY-MM-DD')
-                : '',
-            dueDate: task.dueDate ? task.dueDate.format('YYYY-MM-DD') : '',
-            doneDate: task.doneDate ? task.doneDate.format('YYYY-MM-DD') : '',
+            createdDate: new TasksDate(task.createdDate).formatAsDate(),
+            startDate: new TasksDate(task.startDate).formatAsDate(),
+            scheduledDate: new TasksDate(task.scheduledDate).formatAsDate(),
+            dueDate: new TasksDate(task.dueDate).formatAsDate(),
+            doneDate: new TasksDate(task.doneDate).formatAsDate(),
             forwardOnly: true,
         };
         setTimeout(() => {
@@ -278,7 +302,7 @@
     const _onSubmit = () => {
         let description = editableTask.description.trim();
         if (addGlobalFilterOnSave) {
-            description = GlobalFilter.prependTo(description);
+            description = GlobalFilter.getInstance().prependTo(description);
         }
 
         const startDate = parseTypedDateForSaving(editableTask.startDate);
@@ -299,6 +323,9 @@
 
         let parsedPriority: Priority;
         switch (editableTask.priority) {
+            case 'lowest':
+                parsedPriority = Priority.Lowest;
+                break;
             case 'low':
                 parsedPriority = Priority.Low;
                 break;
@@ -307,6 +334,9 @@
                 break;
             case 'high':
                 parsedPriority = Priority.High;
+                break;
+            case 'highest':
+                parsedPriority = Priority.Highest;
                 break;
             default:
                 parsedPriority = Priority.None;
@@ -344,7 +374,6 @@
                 bind:value={editableTask.description}
                 bind:this={descriptionInput}
                 id="description"
-                type="text"
                 class="tasks-modal-description"
                 placeholder="Take out the trash"
                 accesskey={accesskey("t")}
@@ -359,7 +388,7 @@
         <!-- --------------------------------------------------------------------------- -->
         <div class="tasks-modal-section tasks-modal-priorities" on:keyup={_onPriorityKeyup}>
             <label for="priority-{editableTask.priority}">Priority</label>
-            {#each priorityOptions as {value, label, symbol}}
+            {#each priorityOptions as {value, label, symbol, accessKey, accessKeyIndex}}
                 <span>
                     <!-- svelte-ignore a11y-accesskey -->
                     <input
@@ -367,10 +396,10 @@
                         id="priority-{value}"
                         {value}
                         bind:group={editableTask.priority}
-                        accesskey={accesskey(label.charAt(0).toLowerCase())}
+                        accesskey={accesskey(accessKey)}
                     />
                     <label for="priority-{value}">
-                        <span class="accesskey-first">{label}</span>
+                        <span>{label.substring(0,accessKeyIndex)}</span><span class="accesskey">{label.substring(accessKeyIndex,accessKeyIndex+1)}</span><span>{label.substring(accessKeyIndex+1)}</span>
                         {#if symbol && symbol.charCodeAt(0) >= 0x100}
                             <span>{symbol}</span>
                         {/if}

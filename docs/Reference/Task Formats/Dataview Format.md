@@ -74,8 +74,6 @@ The brackets `[]` and `()` differ in how [Dataview displays them](https://blacks
 >   >  - [ ] This is a task [priority:: high], [start:: 2023-04-24], [due:: 2023-05-01]
 >   > ```
 
----
-
 ## Supported dataview fields
 
 These samples demonstrate all the fields supported by the Tasks plugin's parsing of dataview fields.
@@ -104,12 +102,16 @@ For more information, see [[Dates]].
 > [!Info]
 > These names were chosen for use in Tasks, and are not known to dataview. They can of course be searched in dataview.
 
-```markdown
-- [ ] #task Low priority [priority:: low]
+<!-- snippet: DocsSamplesForTaskFormats.test.Serializer_Priorities_dataview-snippet.approved.md -->
+```md
+- [ ] #task Lowest priority  [priority:: lowest]
+- [ ] #task Low priority  [priority:: low]
 - [ ] #task Normal priority
-- [ ] #task Medium priority [priority:: medium]
-- [ ] #task High priority [priority:: high]
+- [ ] #task Medium priority  [priority:: medium]
+- [ ] #task High priority  [priority:: high]
+- [ ] #task Highest priority  [priority:: highest]
 ```
+<!-- endSnippet -->
 
 For more information, see [[Priority]].
 
@@ -124,7 +126,11 @@ For more information, see [[Priority]].
 
 For more information, see [[Recurring Tasks]].
 
----
+## Auto-Suggest and Dataview format
+
+The Dataview format fully supports Tasks' [[Auto-Suggest]] feature, but requires users to manually type out surrounding brackets (`[]` or `()`).  This works best with `Settings > Editor > Autopair Brackets` enabled.
+
+Since Tasks 4.6.1, the Auto-Suggest menu *only* appears between square brackets `[]` or parentheses `()`.
 
 ## Limitations of Dataview Format
 

@@ -13,7 +13,8 @@ export class Urgency {
 
         if (task.dueDate !== null) {
             // Map a range of 21 days to the value 0.2 - 1.0
-            const daysOverdue = Math.round(window.moment().diff(task.dueDate) / Urgency.milliSecondsPerDay);
+            const startOfToday = window.moment().startOf('day');
+            const daysOverdue = Math.round(startOfToday.diff(task.dueDate) / Urgency.milliSecondsPerDay);
 
             let dueMultiplier: number;
             if (daysOverdue >= 7.0) {
@@ -41,6 +42,10 @@ export class Urgency {
         }
 
         switch (task.priority) {
+            // Highest
+            case '0':
+                urgency += 1.5 * Urgency.priorityCoefficient;
+                break;
             // High
             case '1':
                 urgency += 1.0 * Urgency.priorityCoefficient;
@@ -52,6 +57,11 @@ export class Urgency {
             // None
             case '3':
                 urgency += 0.325 * Urgency.priorityCoefficient;
+                break;
+            // no modification for "Low" priority
+            // Lowest
+            case '5':
+                urgency -= 0.3 * Urgency.priorityCoefficient;
                 break;
         }
 

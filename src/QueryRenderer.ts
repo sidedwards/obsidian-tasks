@@ -1,16 +1,21 @@
 import { App, Keymap, MarkdownRenderChild, MarkdownRenderer, Plugin, TFile } from 'obsidian';
 import type { EventRef, MarkdownPostProcessorContext } from 'obsidian';
+import { GlobalFilter } from './Config/GlobalFilter';
+import { GlobalQuery } from './Config/GlobalQuery';
 
 import type { IQuery } from './IQuery';
 import { State } from './Cache';
 import { getTaskLineAndFile, replaceTaskWithTasks } from './File';
 import type { GroupDisplayHeading } from './Query/GroupDisplayHeading';
+import { taskToLi } from './TaskLineRenderer';
 import { TaskModal } from './TaskModal';
 import type { TasksEvents } from './TasksEvents';
 import type { Task } from './Task';
 import { DateFallback } from './DateFallback';
 import { TaskLayout } from './TaskLayout';
 import { explainResults, getQueryForQueryRenderer } from './lib/QueryRendererHelper';
+import type { QueryResult } from './Query/QueryResult';
+import type { TaskGroups } from './Query/TaskGroups';
 
 export class QueryRenderer {
     private readonly app: App;
@@ -41,8 +46,22 @@ export class QueryRenderer {
 class QueryRenderChild extends MarkdownRenderChild {
     private readonly app: App;
     private readonly events: TasksEvents;
-    private readonly source: string; // The complete text in the instruction block, such as 'not done\nshort mode'
-    private readonly filePath: string; // The path of the file that contains the instruction block
+
+    /**
+     * The complete text in the instruction block, such as:
+     * ```
+     *   not done
+     *   short mode
+     * ```
+     *
+     * This does not contain the Global Query from the user's settings.
+     * Use {@link getQueryForQueryRenderer} to get this value prefixed with the Global Query.
+     */
+    private readonly source: string;
+
+    /// The path of the file that contains the instruction block.
+    private readonly filePath: string;
+
     private query: IQuery;
     private queryType: string;
 
@@ -74,12 +93,12 @@ class QueryRenderChild extends MarkdownRenderChild {
         // added later.
         switch (this.containerEl.className) {
             case 'block-language-tasks':
-                this.query = getQueryForQueryRenderer(this.source);
+                this.query = getQueryForQueryRenderer(this.source, GlobalQuery.getInstance(), this.filePath);
                 this.queryType = 'tasks';
                 break;
 
             default:
-                this.query = getQueryForQueryRenderer(this.source);
+                this.query = getQueryForQueryRenderer(this.source, GlobalQuery.getInstance(), this.filePath);
                 this.queryType = 'tasks';
                 break;
         }
@@ -120,7 +139,7 @@ class QueryRenderChild extends MarkdownRenderChild {
         const millisecondsToMidnight = midnight.getTime() - now.getTime();
 
         this.queryReloadTimeout = setTimeout(() => {
-            this.query = getQueryForQueryRenderer(this.source);
+            this.query = getQueryForQueryRenderer(this.source, GlobalQuery.getInstance(), this.filePath);
             // Process the current cache state:
             this.events.triggerRequestCacheUpdate(this.render.bind(this));
             this.reloadQueryAtMidnight();
@@ -134,42 +153,61 @@ class QueryRenderChild extends MarkdownRenderChild {
 
         const content = this.containerEl.createEl('div');
         if (state === State.Warm && this.query.error === undefined) {
-            console.debug(
-                `Render ${this.queryType} called for a block in active file "${this.filePath}", to select from ${tasks.length} tasks: plugin state: ${state}`,
-            );
-
-            if (this.query.layoutOptions.explainQuery) {
-                this.createExplanation(content);
-            }
-
-            const tasksSortedLimitedGrouped = this.query.applyQueryToTasks(tasks);
-            for (const group of tasksSortedLimitedGrouped.groups) {
-                // If there were no 'group by' instructions, group.groupHeadings
-                // will be empty, and no headings will be added.
-                this.addGroupHeadings(content, group.groupHeadings);
-
-                const { taskList } = await this.createTasksList({
-                    tasks: group.tasks,
-                    content: content,
-                });
-                content.appendChild(taskList);
-            }
-            const totalTasksCount = tasksSortedLimitedGrouped.totalTasksCount();
-            console.debug(`${totalTasksCount} of ${tasks.length} tasks displayed in a block in "${this.filePath}"`);
-            this.addTaskCount(content, totalTasksCount);
+            await this.renderQuerySearchResults(tasks, state, content);
         } else if (this.query.error !== undefined) {
-            content.createDiv().innerHTML =
-                '<pre>' + `Tasks query: ${this.query.error.replace(/\n/g, '<br>')}` + '</pre>';
+            this.renderErrorMessage(content, this.query.error);
         } else {
-            content.setText('Loading Tasks ...');
+            this.renderLoadingMessage(content);
         }
 
         this.containerEl.firstChild?.replaceWith(content);
     }
 
+    private async renderQuerySearchResults(tasks: Task[], state: State.Warm, content: HTMLDivElement) {
+        // See https://github.com/obsidian-tasks-group/obsidian-tasks/issues/2160
+        const debug = false;
+        if (debug) {
+            console.debug(
+                `Render ${this.queryType} called for a block in active file "${this.filePath}", to select from ${tasks.length} tasks: plugin state: ${state}`,
+            );
+        }
+
+        if (this.query.layoutOptions.explainQuery) {
+            this.createExplanation(content);
+        }
+
+        const queryResult = this.query.applyQueryToTasks(tasks);
+        if (queryResult.searchErrorMessage !== undefined) {
+            // There was an error in the search, for example due to a problem custom function.
+            this.renderErrorMessage(content, queryResult.searchErrorMessage);
+            return;
+        }
+
+        await this.addAllTaskGroups(queryResult.taskGroups, content);
+
+        const totalTasksCount = queryResult.totalTasksCount;
+        if (debug) {
+            console.debug(`${totalTasksCount} of ${tasks.length} tasks displayed in a block in "${this.filePath}"`);
+        }
+        this.addTaskCount(content, queryResult);
+    }
+
+    private renderErrorMessage(content: HTMLDivElement, errorMessage: string) {
+        content.createDiv().innerHTML = '<pre>' + `Tasks query: ${errorMessage.replace(/\n/g, '<br>')}` + '</pre>';
+    }
+
+    private renderLoadingMessage(content: HTMLDivElement) {
+        content.setText('Loading Tasks ...');
+    }
+
     // Use the 'explain' instruction to enable this
     private createExplanation(content: HTMLDivElement) {
-        const explanationAsString = explainResults(this.source);
+        const explanationAsString = explainResults(
+            this.source,
+            GlobalFilter.getInstance(),
+            GlobalQuery.getInstance(),
+            this.filePath,
+        );
 
         const explanationsBlock = content.createEl('pre');
         explanationsBlock.addClasses(['plugin-tasks-query-explanation']);
@@ -177,38 +215,28 @@ class QueryRenderChild extends MarkdownRenderChild {
         content.appendChild(explanationsBlock);
     }
 
-    private async createTasksList({
-        tasks,
-        content,
-    }: {
-        tasks: Task[];
-        content: HTMLDivElement;
-    }): Promise<{ taskList: HTMLUListElement; tasksCount: number }> {
-        const tasksCount = tasks.length;
-
+    private async createTaskList(tasks: Task[], content: HTMLDivElement): Promise<void> {
         const layout = new TaskLayout(this.query.layoutOptions);
         const taskList = content.createEl('ul');
         taskList.addClasses(['contains-task-list', 'plugin-tasks-query-result']);
-        taskList.addClasses(layout.specificClasses);
+        taskList.addClasses(layout.taskListHiddenClasses);
         const groupingAttribute = this.getGroupingAttribute();
         if (groupingAttribute && groupingAttribute.length > 0) taskList.dataset.taskGroupBy = groupingAttribute;
-        for (let i = 0; i < tasksCount; i++) {
-            const task = tasks[i];
+        for (const [i, task] of tasks.entries()) {
             const isFilenameUnique = this.isFilenameUnique({ task });
 
-            const listItem = await task.toLi({
+            const listItem = await taskToLi(task, {
                 parentUlElement: taskList,
                 listIndex: i,
                 layoutOptions: this.query.layoutOptions,
                 isFilenameUnique,
                 taskLayout: layout,
+                obsidianComponent: this,
             });
 
             // Remove all footnotes. They don't re-appear in another document.
             const footnotes = listItem.querySelectorAll('[data-footnote-id]');
             footnotes.forEach((footnote) => footnote.remove());
-
-            const shortMode = this.query.layoutOptions.shortMode;
 
             const extrasSpan = listItem.createSpan('task-extras');
 
@@ -217,6 +245,7 @@ class QueryRenderChild extends MarkdownRenderChild {
             }
 
             if (!this.query.layoutOptions.hideBacklinks) {
+                const shortMode = this.query.layoutOptions.shortMode;
                 this.addBacklinks(extrasSpan, task, shortMode, isFilenameUnique);
             }
 
@@ -227,7 +256,7 @@ class QueryRenderChild extends MarkdownRenderChild {
             taskList.appendChild(listItem);
         }
 
-        return { taskList, tasksCount };
+        content.appendChild(taskList);
     }
 
     private addEditButton(listItem: HTMLElement, task: Task) {
@@ -259,6 +288,16 @@ class QueryRenderChild extends MarkdownRenderChild {
         listItem.createSpan({ text, cls: 'tasks-urgency' });
     }
 
+    private async addAllTaskGroups(tasksSortedLimitedGrouped: TaskGroups, content: HTMLDivElement) {
+        for (const group of tasksSortedLimitedGrouped.groups) {
+            // If there were no 'group by' instructions, group.groupHeadings
+            // will be empty, and no headings will be added.
+            this.addGroupHeadings(content, group.groupHeadings);
+
+            await this.createTaskList(group.tasks, content);
+        }
+    }
+
     /**
      * Display headings for a group of tasks.
      * @param content
@@ -273,25 +312,18 @@ class QueryRenderChild extends MarkdownRenderChild {
     }
 
     private async addGroupHeading(content: HTMLDivElement, group: GroupDisplayHeading) {
-        let header: any;
-        // Is it possible to remove the repetition here?
-        // Ideally, by creating a variable that contains h4, h5 or h6
-        // and then only having one call to content.createEl().
+        // Headings nested to 2 or more levels are all displayed with 'h6:
+        let header: keyof HTMLElementTagNameMap = 'h6';
         if (group.nestingLevel === 0) {
-            header = content.createEl('h4', {
-                cls: 'tasks-group-heading',
-            });
+            header = 'h4';
         } else if (group.nestingLevel === 1) {
-            header = content.createEl('h5', {
-                cls: 'tasks-group-heading',
-            });
-        } else {
-            // Headings nested to 2 or more levels are all displayed with 'h6:
-            header = content.createEl('h6', {
-                cls: 'tasks-group-heading',
-            });
+            header = 'h5';
         }
-        await MarkdownRenderer.renderMarkdown(group.displayName, header, this.filePath, this);
+
+        const headerEl = content.createEl(header, {
+            cls: 'tasks-group-heading',
+        });
+        await MarkdownRenderer.renderMarkdown(group.displayName, headerEl, this.filePath, this);
     }
 
     private addBacklinks(listItem: HTMLElement, task: Task, shortMode: boolean, isFilenameUnique: boolean | undefined) {
@@ -357,10 +389,10 @@ class QueryRenderChild extends MarkdownRenderChild {
         }
     }
 
-    private addTaskCount(content: HTMLDivElement, tasksCount: number) {
+    private addTaskCount(content: HTMLDivElement, queryResult: QueryResult) {
         if (!this.query.layoutOptions.hideTaskCount) {
             content.createDiv({
-                text: `${tasksCount} task${tasksCount !== 1 ? 's' : ''}`,
+                text: queryResult.totalTasksCountDisplayText(),
                 cls: 'tasks-count',
             });
         }

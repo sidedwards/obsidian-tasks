@@ -3,7 +3,7 @@
  */
 import moment from 'moment';
 import { DueDateField } from '../../../src/Query/Filter/DueDateField';
-import type { FilterOrErrorMessage } from '../../../src/Query/Filter/Filter';
+import type { FilterOrErrorMessage } from '../../../src/Query/Filter/FilterOrErrorMessage';
 import { TaskBuilder } from '../../TestingTools/TaskBuilder';
 import { testFilter } from '../../TestingTools/FilterTestHelpers';
 import {
@@ -13,6 +13,7 @@ import {
 } from '../../CustomMatchers/CustomMatchersForSorting';
 import { Query } from '../../../src/Query/Query';
 import { MarkdownTable } from '../../TestingTools/VerifyMarkdownTable';
+import { SampleTasks } from '../../TestHelpers';
 
 window.moment = moment;
 
@@ -37,6 +38,28 @@ describe('due date', () => {
         testTaskFilterForTaskWithDueDate(filter, '2022-04-25', false);
     });
 
+    it('by due date (on or before) should match the given date and all earlier dates', () => {
+        // Arrange
+        const filter = new DueDateField().createFilterOrErrorMessage('due on or before 2023-08-01');
+
+        // Act, Assert
+        testTaskFilterForTaskWithDueDate(filter, null, false);
+        testTaskFilterForTaskWithDueDate(filter, '2023-07-31', true);
+        testTaskFilterForTaskWithDueDate(filter, '2023-08-01', true);
+        testTaskFilterForTaskWithDueDate(filter, '2023-08-02', false);
+    });
+
+    it('by due date (on or after) should match the given date and all later dates', () => {
+        // Arrange
+        const filter = new DueDateField().createFilterOrErrorMessage('due on or after 2022-02-01');
+
+        // Act, Assert
+        testTaskFilterForTaskWithDueDate(filter, null, false);
+        testTaskFilterForTaskWithDueDate(filter, '2022-01-31', false);
+        testTaskFilterForTaskWithDueDate(filter, '2022-02-01', true);
+        testTaskFilterForTaskWithDueDate(filter, '2022-02-02', true);
+    });
+
     it('by due date - before absolute range', () => {
         // Arrange
         const filter = new DueDateField().createFilterOrErrorMessage('due before 2022-04-20 2022-04-24');
@@ -49,6 +72,18 @@ describe('due date', () => {
         testTaskFilterForTaskWithDueDate(filter, '2022-04-25', false);
     });
 
+    it('by due date - on or before absolute range should match the date range and all earlier dates', () => {
+        // Arrange
+        const filter = new DueDateField().createFilterOrErrorMessage('due on or before 2021-07-10 2021-10-04');
+
+        // Act, Assert
+        testTaskFilterForTaskWithDueDate(filter, null, false);
+        testTaskFilterForTaskWithDueDate(filter, '2021-07-09', true);
+        testTaskFilterForTaskWithDueDate(filter, '2021-07-10', true);
+        testTaskFilterForTaskWithDueDate(filter, '2021-10-04', true);
+        testTaskFilterForTaskWithDueDate(filter, '2021-10-05', false);
+    });
+
     it('by due date - on absolute range', () => {
         // Arrange
         const filter = new DueDateField().createFilterOrErrorMessage('due on 2022-04-20 2022-04-24');
@@ -59,6 +94,18 @@ describe('due date', () => {
         testTaskFilterForTaskWithDueDate(filter, '2022-04-20', true);
         testTaskFilterForTaskWithDueDate(filter, '2022-04-24', true);
         testTaskFilterForTaskWithDueDate(filter, '2022-04-25', false);
+    });
+
+    it('by due date - on or after absolute range should match the date range and all later dates', () => {
+        // Arrange
+        const filter = new DueDateField().createFilterOrErrorMessage('due on or after 2023-03-10 2023-04-01');
+
+        // Act, Assert
+        testTaskFilterForTaskWithDueDate(filter, null, false);
+        testTaskFilterForTaskWithDueDate(filter, '2023-03-09', false);
+        testTaskFilterForTaskWithDueDate(filter, '2023-03-10', true);
+        testTaskFilterForTaskWithDueDate(filter, '2023-04-01', true);
+        testTaskFilterForTaskWithDueDate(filter, '2023-04-02', true);
     });
 
     it('by due date - after absolute range', () => {
@@ -452,6 +499,26 @@ describe('explain due date queries', () => {
   2023-01-17 (Tuesday 17th January 2023) inclusive`,
         );
     });
+
+    it('should explain "on or before" with a single date', () => {
+        const filterOrMessage = new DueDateField().createFilterOrErrorMessage('due on or before 2023-08-08');
+        expect(filterOrMessage).toHaveExplanation('due date is on or before 2023-08-08 (Tuesday 8th August 2023)');
+    });
+
+    it('should explain "on or after" with a single date', () => {
+        const filterOrMessage = new DueDateField().createFilterOrErrorMessage('due on or after 2023-07-29');
+        expect(filterOrMessage).toHaveExplanation('due date is on or after 2023-07-29 (Saturday 29th July 2023)');
+    });
+
+    it('should explain "in or before" with an absolute date range', () => {
+        const filterOrMessage = new DueDateField().createFilterOrErrorMessage('due in or before 2023-10-20 2023-11-01');
+        expect(filterOrMessage).toHaveExplanation('due date is on or before 2023-11-01 (Wednesday 1st November 2023)');
+    });
+
+    it('should explain "in or after" with an absolute date range', () => {
+        const filterOrMessage = new DueDateField().createFilterOrErrorMessage('due in or after 2023-10-20 2023-11-01');
+        expect(filterOrMessage).toHaveExplanation('due date is on or after 2023-10-20 (Friday 20th October 2023)');
+    });
 });
 
 describe('sorting by due', () => {
@@ -503,7 +570,7 @@ describe('due date', () => {
         keywords.forEach((keyword) => {
             const newRow = [keyword];
             dates.forEach((date) => {
-                const query = new Query({ source: `due ${keyword}${date}` });
+                const query = new Query(`due ${keyword}${date}`);
                 expect(query.error).toBeUndefined();
 
                 newRow.push(query.explainQuery().replace(/(\n)/g, '<br>'));
@@ -523,12 +590,25 @@ describe('grouping by due date', () => {
 
     it('group by due date', () => {
         // Arrange
-        const grouper = new DueDateField().createGrouper();
+        const grouper = new DueDateField().createNormalGrouper();
         const taskWithDate = new TaskBuilder().dueDate('1970-01-01').build();
         const taskWithoutDate = new TaskBuilder().build();
 
         // Assert
         expect(grouper.grouper(taskWithDate)).toEqual(['1970-01-01 Thursday']);
         expect(grouper.grouper(taskWithoutDate)).toEqual(['No due date']);
+    });
+
+    it('should sort groups for DueDateField', () => {
+        const grouper = new DueDateField().createNormalGrouper();
+        const tasks = SampleTasks.withAllRepresentativeDueDates();
+
+        expect({ grouper, tasks }).groupHeadingsToBe([
+            '2023-05-30 Tuesday',
+            '2023-05-31 Wednesday',
+            '2023-06-01 Thursday',
+            'Invalid date',
+            'No due date',
+        ]);
     });
 });

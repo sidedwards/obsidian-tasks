@@ -6,7 +6,7 @@ import { HappensDateField } from '../../../src/Query/Filter/HappensDateField';
 import { TaskBuilder } from '../../TestingTools/TaskBuilder';
 import { testFilter } from '../../TestingTools/FilterTestHelpers';
 import * as CustomMatchersForSorting from '../../CustomMatchers/CustomMatchersForSorting';
-import { fromLine } from '../../TestHelpers';
+import { SampleTasks, fromLine } from '../../TestHelpers';
 
 window.moment = moment;
 
@@ -150,9 +150,26 @@ describe('grouping by happens date', () => {
         ['- [ ] start is earliest date 🛫 1970-01-01 ⏳ 1970-01-02 📅 1970-01-03', ['1970-01-01 Thursday']],
     ])('group by happens date: task "%s" should have groups %s', (taskLine: string, expectedResult: string[]) => {
         // Arrange
-        const grouper = new HappensDateField().createGrouper();
+        const grouper = new HappensDateField().createNormalGrouper();
 
         // Assert
         expect(grouper.grouper(fromLine({ line: taskLine }))).toEqual(expectedResult);
+    });
+
+    it('should sort groups for HappensDateField', () => {
+        const grouper = new HappensDateField().createNormalGrouper();
+        const tasks = [
+            ...SampleTasks.withAllRepresentativeDueDates(),
+            ...SampleTasks.withAllRepresentativeScheduledDates(),
+            ...SampleTasks.withAllRepresentativeStartDates(),
+        ];
+
+        expect({ grouper, tasks }).groupHeadingsToBe([
+            '2023-05-30 Tuesday',
+            '2023-05-31 Wednesday',
+            '2023-06-01 Thursday',
+            'Invalid date',
+            'No happens date',
+        ]);
     });
 });

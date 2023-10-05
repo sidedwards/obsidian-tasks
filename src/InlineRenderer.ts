@@ -1,6 +1,8 @@
 import type { MarkdownPostProcessorContext, Plugin } from 'obsidian';
+import { MarkdownRenderChild } from 'obsidian';
 import { GlobalFilter } from './Config/GlobalFilter';
 import { Task } from './Task';
+import { taskToLi } from './TaskLineRenderer';
 import { TaskLocation } from './TaskLocation';
 
 export class InlineRenderer {
@@ -15,6 +17,11 @@ export class InlineRenderer {
      * of QueryRenderer (e.g. it removes the global filter and handles other formatting).
      */
     private async _markdownPostProcessor(element: HTMLElement, context: MarkdownPostProcessorContext): Promise<void> {
+        // As of Obsidian 1.3.0, it is required by Obsidian to create and/or pass a Component object
+        // when using its Markdown rendering methods
+        const childComponent = new MarkdownRenderChild(element);
+        context.addChild(childComponent);
+
         const renderedElements = element.findAll('.task-list-item').filter((taskItem) => {
             const linesText = taskItem.textContent?.split('\n');
             if (linesText === undefined) {
@@ -40,7 +47,7 @@ export class InlineRenderer {
                 return false;
             }
 
-            return GlobalFilter.includedIn(firstLineText);
+            return GlobalFilter.getInstance().includedIn(firstLineText);
         });
         if (renderedElements.length === 0) {
             // No tasks means nothing to do.
@@ -93,9 +100,10 @@ export class InlineRenderer {
 
             const dataLine: string = renderedElement.getAttr('data-line') ?? '0';
             const listIndex: number = Number.parseInt(dataLine, 10);
-            const taskElement = await task.toLi({
+            const taskElement = await taskToLi(task, {
                 parentUlElement: element,
                 listIndex,
+                obsidianComponent: childComponent,
             });
 
             // If the rendered element contains a sub-list or sub-div (e.g. the

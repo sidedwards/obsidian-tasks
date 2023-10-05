@@ -4,6 +4,37 @@ import { DateFallback } from '../DateFallback';
 import { StatusRegistry } from '../StatusRegistry';
 import { TaskLocation } from '../TaskLocation';
 import { getSettings } from '../Config/Settings';
+import { GlobalFilter } from '../Config/GlobalFilter';
+
+function getDefaultCreatedDate() {
+    const { setCreatedDate } = getSettings();
+    return setCreatedDate ? window.moment() : null;
+}
+
+function shouldUpdateCreatedDateForTask(task: Task) {
+    const { setCreatedDate } = getSettings();
+
+    if (!setCreatedDate) {
+        // Auto-adding of Created Date is disabled in settings.
+        return false;
+    }
+
+    if (task.createdDate !== null) {
+        // The task already had a created date, so don't change it.
+        return false;
+    }
+
+    // If the description was empty, treat it as new and add a creation date.
+    const descriptionIsEmpty = task.description === '';
+
+    // If the global filter will be added when the task is saved, treat it as new and add a creation date.
+    // See issue #2112.
+    const globalFilterEnabled = !GlobalFilter.getInstance().isEmpty();
+    const taskDoesNotContainGlobalFilter = !GlobalFilter.getInstance().includedIn(task.description);
+    const needsGlobalFilterToBeAdded = globalFilterEnabled && taskDoesNotContainGlobalFilter;
+
+    return descriptionIsEmpty || needsGlobalFilterToBeAdded;
+}
 
 /**
  * Read any markdown line and treat it as a task, for the purposes of
@@ -19,26 +50,24 @@ import { getSettings } from '../Config/Settings';
  * @param path - The path of the file containing the line
  */
 export const taskFromLine = ({ line, path }: { line: string; path: string }): Task => {
-    const fallbackDate = DateFallback.fromPath(path);
-
-    const task = Task.fromLine({
+    // We get all signifiers from the line, even if the Global Filter is missing.
+    // This helps users who, for some reason, have data in a task line without the Global Filter.
+    const task = Task.parseTaskSignifiers(
         line,
-        taskLocation: TaskLocation.fromUnknownPosition(path), // We don't need precise location to toggle it here in the editor.
-        fallbackDate, // set the scheduled date from the filename, so it can be displayed in the dialog
-    });
+        TaskLocation.fromUnknownPosition(path), // We don't need precise location to toggle it here in the editor.
+        DateFallback.fromPath(path), // set the scheduled date from the filename, so it can be displayed in the dialog
+    );
+
+    const createdDate = getDefaultCreatedDate();
 
     if (task !== null) {
+        if (shouldUpdateCreatedDateForTask(task)) {
+            return new Task({ ...task, createdDate });
+        }
         return task;
     }
 
-    const { setCreatedDate } = getSettings();
-    let createdDate: moment.Moment | null = null;
-    if (setCreatedDate) {
-        createdDate = window.moment();
-    }
-
     // If we are not on a line of a task, we take what we have.
-    // The non-task line can still be a checklist, for example if it is lacking the global filter.
     const nonTaskMatch = line.match(TaskRegularExpressions.nonTaskRegex);
     if (nonTaskMatch === null) {
         // Should never happen; everything in the regex is optional.

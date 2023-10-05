@@ -1,5 +1,5 @@
 import { BacklinkField } from '../../../src/Query/Filter/BacklinkField';
-import { fromLine } from '../../TestHelpers';
+import { SampleTasks, fromLine } from '../../TestHelpers';
 
 describe('backlink', () => {
     it('should provide the backlink', () => {
@@ -35,31 +35,52 @@ describe('grouping by backlink', () => {
 
     it.each([
         // no location supplied
-        [undefined, 'heading', ['Unknown Location']],
+        ['', 'heading', ['Unknown Location']],
 
         // no heading supplied
-        ['a/b/c.md', undefined, ['c']],
+        ['a/b/c.md', null, ['[[c]]']],
 
         // File and heading, nominal case
-        ['a/b/c.md', 'heading', ['c > heading']],
+        ['a/b/c.md', 'heading', ['[[c#heading|c > heading]]']],
 
-        // If file name and heading are identical, avoid duplication ('c > c')
-        ['a/b/c.md', 'c', ['c']],
+        // If file name and heading are identical, allow duplication ('c > c'), in order to link to correct section
+        ['a/b/c.md', 'c', ['[[c#c|c > c]]']],
 
-        // Underscores in file name component are escaped
-        ['a/b/_c_.md', undefined, ['\\_c\\_']],
+        // If file name and heading are identical, allow duplication, even if there are underscores in the file name
+        ['a_b_c.md', 'a_b_c', ['[[a_b_c#a_b_c|a_b_c > a_b_c]]']],
 
-        // But underscores in the heading component are not
-        ['a/b/_c_.md', 'heading _italic text_', ['\\_c\\_ > heading _italic text_']],
+        // Underscores in filename component are not escaped
+        ['a/b/_c_.md', null, ['[[_c_]]']],
+
+        // Underscores in the heading component are not escaped either
+        ['a/b/_c_.md', 'heading _italic text_', ['[[_c_#heading _italic text_|_c_ > heading _italic text_]]']],
     ])(
-        'task "%s" with path "%s" should have groups: %s',
-        (path: string | undefined, heading: string | undefined, groups: string[]) => {
+        'path "%s" and heading "%s" should have groups: %s',
+        (path: string, heading: string | null, groups: string[]) => {
             // Arrange
-            const grouper = new BacklinkField().createGrouper().grouper;
+            const grouper = new BacklinkField().createNormalGrouper().grouper;
             const t = '- [ ] xyz';
 
             // Assert
             expect(grouper(fromLine({ line: t, path: path, precedingHeader: heading }))).toEqual(groups);
         },
     );
+
+    it('should sort groups for BacklinkField', () => {
+        // Arrange
+        const tasks = SampleTasks.withAllRootsPathsHeadings();
+        const grouper = new BacklinkField().createNormalGrouper();
+
+        // Assert
+        expect({ grouper, tasks }).groupHeadingsToBe([
+            '[[_c_]]',
+            '[[_c_#heading _italic text_|_c_ > heading _italic text_]]',
+            '[[a_b_c#a_b_c|a_b_c > a_b_c]]',
+            '[[b]]',
+            '[[c]]',
+            '[[c#c|c > c]]',
+            '[[c#heading|c > heading]]',
+            'Unknown Location',
+        ]);
+    });
 });

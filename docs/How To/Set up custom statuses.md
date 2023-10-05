@@ -37,15 +37,13 @@ This is what you see in the Tasks settings when you first look at the Task Statu
 
 You can read about it in [[Status Settings]].
 
----
-
 ## Example: Add a set of high priority statuses
 
 ### Goal
 
 Suppose that you wanted to create a set of 3 statuses that cycle between each other, perhaps to make important tasks stand-out from everything else:
 
-<!-- placeholder to force blank line before included text --> <!-- include: DocsSamplesForStatuses.test.DefaultStatuses_important-cycle.approved.md -->
+<!-- placeholder to force blank line before included text --><!-- include: DocsSamplesForStatuses.test.DefaultStatuses_important-cycle.approved.md -->
 
 | Status Symbol | Next Status Symbol | Status Name | Status Type | Needs Custom Styling |
 | ----- | ----- | ----- | ----- | ----- |
@@ -53,7 +51,7 @@ Suppose that you wanted to create a set of 3 statuses that cycle between each ot
 | `D` | `X` | Doing - Important | `IN_PROGRESS` | Yes |
 | `X` | `!` | Done - Important | `DONE` | Yes |
 
-<!-- placeholder to force blank line after included text --> <!-- endInclude -->
+<!-- placeholder to force blank line after included text --><!-- endInclude -->
 
 ### The Steps
 
@@ -122,7 +120,7 @@ Repeat again:
 
 ## Related pages
 
-<!-- force a blank line --> <!-- include: snippet-statuses-overview.md -->
+<!-- force a blank line --><!-- include: snippet-statuses-overview.md -->
 
 > [!info]
 > Broad steps to understand and set up Statuses (or "Alternate Checkboxes"):
@@ -131,7 +129,7 @@ Repeat again:
 >   - [[Statuses]]
 >   - [[Custom Statuses]]
 > - Choose your status styling scheme: this will determine the names and symbols for your custom statuses:
->   - Some common ones are shown in [[Status Collections]]
+>   - Some common ones are shown in [[About Status Collections]]
 > - Set up your status styling scheme
 >   - [[Style custom statuses|How to style custom statuses]].
 > - Configure Tasks to use your custom statuses
@@ -139,4 +137,4 @@ Repeat again:
 > - Optionally, update your tasks searches to take advantage of the new flexibility
 >   - [[Filters#Filters for Task Statuses|Filters for Task Statuses]]
 
-<!-- force a blank line --> <!-- endInclude -->
+<!-- force a blank line --><!-- endInclude -->

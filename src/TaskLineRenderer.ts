@@ -7,11 +7,13 @@ import { TaskLayout } from './TaskLayout';
 import { replaceTaskWithTasks } from './File';
 import { TASK_FORMATS, getSettings } from './Config/Settings';
 import { GlobalFilter } from './Config/GlobalFilter';
+import { PriorityTools } from './lib/PriorityTools';
 
 export type TaskLineRenderDetails = {
     parentUlElement: HTMLElement;
     /** The nth item in this list (including non-tasks). */
     listIndex: number;
+    obsidianComponent: Component | null;
     layoutOptions?: LayoutOptions;
     isFilenameUnique?: boolean;
     taskLayout?: TaskLayout;
@@ -35,11 +37,12 @@ const DAY_VALUE_OVER_RANGE_POSTFIX = 'far';
 /**
  * The function used to render a Markdown task line into an existing HTML element.
  */
-export type TextRenderer = (text: string, element: HTMLSpanElement, path: string) => Promise<void>;
-
-async function obsidianMarkdownRenderer(text: string, element: HTMLSpanElement, path: string) {
-    await MarkdownRenderer.renderMarkdown(text, element, path, null as unknown as Component);
-}
+export type TextRenderer = (
+    text: string,
+    element: HTMLSpanElement,
+    path: string,
+    obsidianComponent: Component | null, // null is allowed here only for tests
+) => Promise<void>;
 
 /**
  * Renders a given Task object into an HTML List Item (LI) element, using the given renderDetails
@@ -51,9 +54,8 @@ async function obsidianMarkdownRenderer(text: string, element: HTMLSpanElement, 
 export async function renderTaskLine(
     task: Task,
     renderDetails: TaskLineRenderDetails,
-    textRenderer: TextRenderer | null = null,
+    textRenderer: TextRenderer,
 ): Promise<HTMLLIElement> {
-    if (!textRenderer) textRenderer = obsidianMarkdownRenderer;
     const li: HTMLLIElement = document.createElement('li');
     renderDetails.parentUlElement.appendChild(li);
 
@@ -89,7 +91,7 @@ export async function renderTaskLine(
 
         // Should be re-rendered as enabled after update in file.
         checkbox.disabled = true;
-        const toggledTasks = task.toggle();
+        const toggledTasks = task.toggleWithRecurrenceInUsersOrder();
         replaceTaskWithTasks({
             originalTask: task,
             newTasks: toggledTasks,
@@ -112,6 +114,8 @@ export async function renderTaskLine(
     return li;
 }
 
+export type AttributesDictionary = { [key: string]: string };
+
 async function taskToHtml(
     task: Task,
     renderDetails: TaskLineRenderDetails,
@@ -122,11 +126,11 @@ async function taskToHtml(
     const taskLayout = new TaskLayout(renderDetails.layoutOptions);
     const emojiSerializer = TASK_FORMATS.tasksPluginEmoji.taskSerializer;
     // Render and build classes for all the task's visible components
-    for (const component of taskLayout.layoutComponents) {
+    for (const component of taskLayout.shownTaskLayoutComponents) {
         let componentString = emojiSerializer.componentToString(task, taskLayout, component);
         if (componentString) {
             if (component === 'description') {
-                componentString = GlobalFilter.removeAsSubstringFromDependingOnSettings(componentString);
+                componentString = GlobalFilter.getInstance().removeAsWordFromDependingOnSettings(componentString);
             }
             // Create the text span that will hold the rendered component
             const span = document.createElement('span');
@@ -138,22 +142,32 @@ async function taskToHtml(
                 // to do things like surrouding only the text (rather than its whole placeholder) with a highlight
                 const internalSpan = document.createElement('span');
                 span.appendChild(internalSpan);
-                await renderComponentText(internalSpan, componentString, component, task, textRenderer);
-                const [genericClasses, dataAttributes] = getComponentClassesAndData(component, task);
+                await renderComponentText(
+                    internalSpan,
+                    componentString,
+                    component,
+                    task,
+                    textRenderer,
+                    renderDetails.obsidianComponent,
+                );
                 addInternalClasses(component, internalSpan);
-                // Add the generic classes that apply to what this component is (priority, due date etc)
-                span.classList.add(...genericClasses);
-                // Add the attributes to the component ('priority-medium', 'due-past-1d' etc)
-                for (const key in dataAttributes) span.dataset[key] = dataAttributes[key];
-                allAttributes = { ...allAttributes, ...dataAttributes };
+
+                // Add the component's CSS class describing what this component is (priority, due date etc.)
+                const componentClass = getTaskComponentClass(component, task);
+                span.classList.add(...componentClass);
+
+                // Add the component's attribute ('priority-medium', 'due-past-1d' etc.)
+                const componentDataAttribute = getComponentDataAttribute(component, task);
+                for (const key in componentDataAttribute) span.dataset[key] = componentDataAttribute[key];
+                allAttributes = { ...allAttributes, ...componentDataAttribute };
             }
         }
     }
 
     // Now build classes for the hidden task components without rendering them
-    for (const component of taskLayout.hiddenComponents) {
-        const [_, dataAttributes] = getComponentClassesAndData(component, task);
-        allAttributes = { ...allAttributes, ...dataAttributes };
+    for (const component of taskLayout.hiddenTaskLayoutComponents) {
+        const hiddenComponentDataAttribute = getComponentDataAttribute(component, task);
+        allAttributes = { ...allAttributes, ...hiddenComponentDataAttribute };
     }
 
     // If a task has no priority field set, its priority will not be rendered as part of the loop above and
@@ -162,8 +176,8 @@ async function taskToHtml(
     // So if the priority was not rendered, force it through the pipe of getting the component data for the
     // priority field.
     if (allAttributes.taskPriority === undefined) {
-        const [_, dataAttributes] = getComponentClassesAndData('priority', task);
-        allAttributes = { ...allAttributes, ...dataAttributes };
+        const priorityDataAttribute = getComponentDataAttribute('priority', task);
+        allAttributes = { ...allAttributes, ...priorityDataAttribute };
     }
 
     return allAttributes;
@@ -178,6 +192,7 @@ async function renderComponentText(
     component: TaskLayoutComponent,
     task: Task,
     textRenderer: TextRenderer,
+    obsidianComponent: Component | null,
 ) {
     if (component === 'description') {
         const { debugSettings } = getSettings();
@@ -185,7 +200,7 @@ async function renderComponentText(
             // Add some debug output to enable hidden information in the task to be inspected.
             componentString += `<br>🐛 <b>${task.lineNumber}</b> . ${task.sectionStart} . ${task.sectionIndex} . '<code>${task.originalMarkdown}</code>'<br>'<code>${task.path}</code>' > '<code>${task.precedingHeader}</code>'<br>`;
         }
-        await textRenderer(componentString, span, task.path);
+        await textRenderer(componentString, span, task.path, obsidianComponent);
 
         // If the task is a block quote, the block quote wraps the p-tag that contains the content.
         // In that case, we need to unwrap the p-tag *inside* the surrounding block quote.
@@ -218,82 +233,86 @@ async function renderComponentText(
     }
 }
 
-export type AttributesDictionary = { [key: string]: string };
-
 /**
- * This function returns two lists -- genericClasses and dataAttributes -- that describe the
- * given component.
- * The genericClasses describe what the component is, e.g. a due date or a priority, and are one of the
- * options in LayoutClasses.
- * The dataAttributes describe the content of the component, e.g. `data-task-priority="medium"`, `data-task-due="past-1d"` etc.
+ * The CSS class that describes what the component is, e.g. a due date or a priority, and is a value from LayoutClasses.
  */
-function getComponentClassesAndData(component: TaskLayoutComponent, task: Task): [string[], AttributesDictionary] {
-    const genericClasses: string[] = [];
-    const dataAttributes: AttributesDictionary = {};
-    const setDateAttribute = (date: Moment, attributeName: string) => {
-        const dateValue = dateToAttribute(date);
-        if (dateValue) dataAttributes[attributeName] = dateValue;
-    };
+function getTaskComponentClass(component: TaskLayoutComponent, task: Task) {
+    const componentClassContainer: string[] = [];
+
+    const componentClass = LayoutClasses[component];
     switch (component) {
+        case 'blockLink':
+            break;
         case 'description':
-            genericClasses.push(LayoutClasses.description);
+        case 'priority':
+        case 'recurrenceRule':
+            componentClassContainer.push(componentClass);
             break;
-        case 'priority': {
-            let priorityValue = null;
-            if (task.priority === taskModule.Priority.High) priorityValue = 'high';
-            else if (task.priority === taskModule.Priority.Medium) priorityValue = 'medium';
-            else if (task.priority === taskModule.Priority.Low) priorityValue = 'low';
-            else priorityValue = 'normal';
-            dataAttributes['taskPriority'] = priorityValue;
-            genericClasses.push(LayoutClasses.priority);
-            break;
-        }
-        case 'createdDate': {
-            const date = task.createdDate;
-            if (date) {
-                genericClasses.push(LayoutClasses.createdDate);
-                setDateAttribute(date, 'taskCreated');
-            }
-            break;
-        }
-        case 'dueDate': {
-            const date = task.dueDate;
-            if (date) {
-                genericClasses.push(LayoutClasses.dueDate);
-                setDateAttribute(date, 'taskDue');
-            }
-            break;
-        }
-        case 'startDate': {
-            const date = task.startDate;
-            if (date) {
-                genericClasses.push(LayoutClasses.startDate);
-                setDateAttribute(date, 'taskStart');
-            }
-            break;
-        }
-        case 'scheduledDate': {
-            const date = task.scheduledDate;
-            if (date) {
-                genericClasses.push(LayoutClasses.scheduledDate);
-                setDateAttribute(date, 'taskScheduled');
-            }
-            break;
-        }
+        case 'createdDate':
+        case 'dueDate':
+        case 'startDate':
+        case 'scheduledDate':
         case 'doneDate': {
-            const date = task.doneDate;
+            const date = task[component];
             if (date) {
-                genericClasses.push(LayoutClasses.doneDate);
-                setDateAttribute(date, 'taskDone');
+                componentClassContainer.push(componentClass);
             }
-            break;
-        }
-        case 'recurrenceRule': {
-            genericClasses.push(LayoutClasses.recurrenceRule);
             break;
         }
     }
-    return [genericClasses, dataAttributes];
+    return componentClassContainer;
+}
+
+/**
+ * The data attribute describes the content of the component, e.g. `data-task-priority="medium"`, `data-task-due="past-1d"` etc.
+ */
+function getComponentDataAttribute(component: TaskLayoutComponent, task: Task) {
+    const dataAttribute: AttributesDictionary = {};
+
+    // If a TaskLayoutComponent needs a data attribute in the task's <span>, add the data attribute name
+    // to this dictionary: key is the component, value is the data attribute name.
+    // Otherwise, just leave an empty string ('') as the value.
+    // Also add the new component to the switch-case below in this function. This is where
+    // the data attribute value shall be calculated and set in the returned dictionary.
+    const DataAttributeNames: { [c in TaskLayoutComponent]: string } = {
+        createdDate: 'taskCreated',
+        dueDate: 'taskDue',
+        startDate: 'taskStart',
+        scheduledDate: 'taskScheduled',
+        doneDate: 'taskDone',
+        priority: 'taskPriority',
+        description: '',
+        recurrenceRule: '',
+        blockLink: '',
+    };
+
+    switch (component) {
+        case 'description':
+        case 'recurrenceRule':
+        case 'blockLink':
+            break;
+        case 'priority': {
+            const attributeName = DataAttributeNames[component];
+            dataAttribute[attributeName] = PriorityTools.priorityNameUsingNormal(task.priority).toLocaleLowerCase();
+            break;
+        }
+        case 'createdDate':
+        case 'dueDate':
+        case 'startDate':
+        case 'scheduledDate':
+        case 'doneDate': {
+            const date = task[component];
+            if (date) {
+                const attributeValue = dateToAttribute(date);
+                if (attributeValue) {
+                    const attributeName = DataAttributeNames[component];
+                    dataAttribute[attributeName] = attributeValue;
+                }
+            }
+            break;
+        }
+    }
+    return dataAttribute;
 }
 
 /*
@@ -374,55 +393,11 @@ function addTooltip({
             recurrenceDiv.setText(`${recurrenceSymbol} ${task.recurrence.toText()}`);
         }
 
-        if (task.createdDate) {
-            const createdDateDiv = tooltip.createDiv();
-            createdDateDiv.setText(
-                toTooltipDate({
-                    signifier: createdDateSymbol,
-                    date: task.createdDate,
-                }),
-            );
-        }
-
-        if (task.startDate) {
-            const startDateDiv = tooltip.createDiv();
-            startDateDiv.setText(
-                toTooltipDate({
-                    signifier: startDateSymbol,
-                    date: task.startDate,
-                }),
-            );
-        }
-
-        if (task.scheduledDate) {
-            const scheduledDateDiv = tooltip.createDiv();
-            scheduledDateDiv.setText(
-                toTooltipDate({
-                    signifier: scheduledDateSymbol,
-                    date: task.scheduledDate,
-                }),
-            );
-        }
-
-        if (task.dueDate) {
-            const dueDateDiv = tooltip.createDiv();
-            dueDateDiv.setText(
-                toTooltipDate({
-                    signifier: dueDateSymbol,
-                    date: task.dueDate,
-                }),
-            );
-        }
-
-        if (task.doneDate) {
-            const doneDateDiv = tooltip.createDiv();
-            doneDateDiv.setText(
-                toTooltipDate({
-                    signifier: doneDateSymbol,
-                    date: task.doneDate,
-                }),
-            );
-        }
+        addDateToTooltip(tooltip, task.createdDate, createdDateSymbol);
+        addDateToTooltip(tooltip, task.startDate, startDateSymbol);
+        addDateToTooltip(tooltip, task.scheduledDate, scheduledDateSymbol);
+        addDateToTooltip(tooltip, task.dueDate, dueDateSymbol);
+        addDateToTooltip(tooltip, task.doneDate, doneDateSymbol);
 
         const linkText = task.getLinkText({ isFilenameUnique });
         if (linkText) {
@@ -436,8 +411,40 @@ function addTooltip({
     });
 }
 
+function addDateToTooltip(tooltip: HTMLDivElement, date: moment.Moment | null, signifier: string) {
+    if (date) {
+        const createdDateDiv = tooltip.createDiv();
+        createdDateDiv.setText(
+            toTooltipDate({
+                signifier: signifier,
+                date: date,
+            }),
+        );
+    }
+}
+
 function toTooltipDate({ signifier, date }: { signifier: string; date: Moment }): string {
     return `${signifier} ${date.format(taskModule.TaskRegularExpressions.dateFormat)} (${date.from(
         window.moment().startOf('day'),
     )})`;
+}
+
+/**
+ * Create an HTML rendered List Item element (LI) for a task.
+ * @note Output is based on the {@link DefaultTaskSerializer}'s format, with default (emoji) symbols
+ * @param task
+ * @param renderDetails
+ */
+export function taskToLi(task: Task, renderDetails: TaskLineRenderDetails): Promise<HTMLLIElement> {
+    async function obsidianMarkdownRenderer(
+        text: string,
+        element: HTMLSpanElement,
+        path: string,
+        obsidianComponent: Component | null,
+    ) {
+        if (!obsidianComponent) throw new Error('Must call the Obsidian renderer with an Obsidian Component object');
+        await MarkdownRenderer.renderMarkdown(text, element, path, obsidianComponent);
+    }
+
+    return renderTaskLine(task, renderDetails, obsidianMarkdownRenderer);
 }

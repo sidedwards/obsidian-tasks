@@ -6,7 +6,7 @@ import moment from 'moment';
 import { RecurrenceField } from '../../../src/Query/Filter/RecurrenceField';
 import { TaskBuilder } from '../../TestingTools/TaskBuilder';
 import { RecurrenceBuilder } from '../../TestingTools/RecurrenceBuilder';
-import { fromLine } from '../../TestHelpers';
+import { SampleTasks, fromLine } from '../../TestHelpers';
 
 window.moment = moment;
 
@@ -88,9 +88,31 @@ describe('grouping by recurrence', () => {
         ['- [ ] a 🔁 every 6 months on the 2nd Wednesday', ['every 6 months on the 2nd Wednesday']],
     ])('task "%s" should have groups: %s', (taskLine: string, groups: string[]) => {
         // Arrange
-        const grouper = new RecurrenceField().createGrouper().grouper;
+        const grouper = new RecurrenceField().createNormalGrouper().grouper;
 
         // Assert
         expect(grouper(fromLine({ line: taskLine }))).toEqual(groups);
+    });
+
+    it('should sort groups for RecurrenceField', () => {
+        const grouper = new RecurrenceField().createNormalGrouper();
+        const tasks = SampleTasks.withAllRecurrences();
+
+        expect({ grouper, tasks }).groupHeadingsToBe([
+            'every 3 weeks on Thursday',
+            'every 4 months on the 3rd Wednesday',
+            'every 4 weeks',
+            'every 6 days',
+            'every 8 days',
+            'every 8 days when done',
+            'every day',
+            'every month',
+            'every month on the 2nd',
+            'every month on the 2nd when done',
+            'every week',
+            'every week on Tuesday',
+            'every week on Tuesday when done',
+            'None',
+        ]);
     });
 });

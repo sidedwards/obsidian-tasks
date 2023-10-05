@@ -1,17 +1,17 @@
 import { StatusNameField } from '../../../src/Query/Filter/StatusNameField';
-import * as TestHelpers from '../../TestHelpers';
 import {
     expectTaskComparesAfter,
     expectTaskComparesBefore,
     expectTaskComparesEqual,
 } from '../../CustomMatchers/CustomMatchersForSorting';
+import { SampleTasks, fromLine } from '../../TestHelpers';
 
 // Abbreviated names so that the markdown text is aligned
-const todoTask = TestHelpers.fromLine({ line: '- [ ] Xxx' });
-const inprTask = TestHelpers.fromLine({ line: '- [/] Xxx' });
-const doneTask = TestHelpers.fromLine({ line: '- [x] Xxx' });
-const cancTask = TestHelpers.fromLine({ line: '- [-] Xxx' });
-const unknTask = TestHelpers.fromLine({ line: '- [%] Xxx' });
+const todoTask = fromLine({ line: '- [ ] Xxx' });
+const inprTask = fromLine({ line: '- [/] Xxx' });
+const doneTask = fromLine({ line: '- [x] Xxx' });
+const cancTask = fromLine({ line: '- [-] Xxx' });
+const unknTask = fromLine({ line: '- [%] Xxx' });
 
 describe('status.name', () => {
     it('value', () => {
@@ -91,10 +91,17 @@ describe('grouping by status.name', () => {
 
     it('group by status.name', () => {
         // Arrange
-        const grouper = new StatusNameField().createGrouper();
+        const grouper = new StatusNameField().createNormalGrouper();
 
         // // Assert
         expect(grouper.grouper(todoTask)).toEqual(['Todo']);
         expect(grouper.grouper(inprTask)).toEqual(['In Progress']);
+    });
+
+    it('should sort groups for StatusNameField', () => {
+        const grouper = new StatusNameField().createNormalGrouper();
+        const tasks = SampleTasks.withAllStatuses();
+
+        expect({ grouper, tasks }).groupHeadingsToBe(['Cancelled', 'Done', 'EMPTY', 'In Progress', 'Todo']);
     });
 });

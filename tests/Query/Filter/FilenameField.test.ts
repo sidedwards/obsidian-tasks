@@ -1,7 +1,7 @@
 import { TaskBuilder } from '../../TestingTools/TaskBuilder';
 import { FilenameField } from '../../../src/Query/Filter/FilenameField';
 import * as CustomMatchersForSorting from '../../CustomMatchers/CustomMatchersForSorting';
-import { fromLine } from '../../TestHelpers';
+import { SampleTasks, fromLine } from '../../TestHelpers';
 
 describe('filename', () => {
     it('should provide access to the file name with extension', () => {
@@ -114,9 +114,18 @@ describe('grouping by filename', () => {
         ['- [ ] a', 'a/b/_c_.md', ['[[_c_]]']],
     ])('task "%s" with path "%s" should have groups: %s', (taskLine: string, path: string, groups: string[]) => {
         // Arrange
-        const grouper = new FilenameField().createGrouper().grouper;
+        const grouper = new FilenameField().createNormalGrouper().grouper;
 
         // Assert
         expect(grouper(fromLine({ line: taskLine, path: path }))).toEqual(groups);
+    });
+
+    it('should sort groups for FilenameField', () => {
+        // Arrange
+        const tasks = SampleTasks.withAllRootsPathsHeadings();
+        const grouper = new FilenameField().createNormalGrouper();
+
+        // Assert
+        expect({ grouper, tasks }).groupHeadingsToBe(['[[_c_]]', '[[a_b_c]]', '[[b]]', '[[c]]', 'Unknown Location']);
     });
 });

@@ -40,18 +40,18 @@ This is what the Custom Statuses look like initially in Tasks' settings, showing
 
 And this is how you can use them:
 
-<!-- placeholder to force blank line before included text --> <!-- include: DocsSamplesForStatuses.test.DefaultStatuses_custom-statuses.approved.md -->
+<!-- placeholder to force blank line before included text --><!-- include: DocsSamplesForStatuses.test.DefaultStatuses_custom-statuses.approved.md -->
 
 | Status Symbol | Next Status Symbol | Status Name<br>`status.name includes...`<br>`sort by status.name`<br>`group by status.name` | Status Type<br>`status.type is...`<br>`sort by status.type`<br>`group by status.type` | Needs Custom Styling |
 | ----- | ----- | ----- | ----- | ----- |
 | `/` | `x` | In Progress | `IN_PROGRESS` | Yes |
 | `-` | `space` | Cancelled | `CANCELLED` | Yes |
 
-<!-- placeholder to force blank line after included text --> <!-- endInclude -->
+<!-- placeholder to force blank line after included text --><!-- endInclude -->
 
 ## Setting up your custom statuses
 
-<!-- force a blank line --> <!-- include: snippet-statuses-overview.md -->
+<!-- force a blank line --><!-- include: snippet-statuses-overview.md -->
 
 > [!info]
 > Broad steps to understand and set up Statuses (or "Alternate Checkboxes"):
@@ -60,7 +60,7 @@ And this is how you can use them:
 >   - [[Statuses]]
 >   - [[Custom Statuses]]
 > - Choose your status styling scheme: this will determine the names and symbols for your custom statuses:
->   - Some common ones are shown in [[Status Collections]]
+>   - Some common ones are shown in [[About Status Collections]]
 > - Set up your status styling scheme
 >   - [[Style custom statuses|How to style custom statuses]].
 > - Configure Tasks to use your custom statuses
@@ -68,7 +68,7 @@ And this is how you can use them:
 > - Optionally, update your tasks searches to take advantage of the new flexibility
 >   - [[Filters#Filters for Task Statuses|Filters for Task Statuses]]
 
-<!-- force a blank line --> <!-- endInclude -->
+<!-- force a blank line --><!-- endInclude -->
 
 ### First choose your styling scheme
 
@@ -76,7 +76,7 @@ You can use any snippet or theme you wish. If you are already using a snippet or
 
 If, however, you are using the default theme, or a theme that doesn't know style "custom checkboxes", you will need to pick one.
 
-[[Status Collections]] has a list of the ones that Tasks already has one-click support for, to help you choose.
+[[About Status Collections]] has a list of the ones that Tasks already has one-click support for, to help you choose.
 
 ### Install your styling scheme
 

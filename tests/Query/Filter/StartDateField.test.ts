@@ -5,6 +5,7 @@ import moment from 'moment';
 import { StartDateField } from '../../../src/Query/Filter/StartDateField';
 import { TaskBuilder } from '../../TestingTools/TaskBuilder';
 import { expectTaskComparesAfter, expectTaskComparesBefore } from '../../CustomMatchers/CustomMatchersForSorting';
+import { SampleTasks } from '../../TestHelpers';
 
 window.moment = moment;
 
@@ -64,12 +65,25 @@ describe('grouping by start date', () => {
 
     it('group by start date', () => {
         // Arrange
-        const grouper = new StartDateField().createGrouper();
+        const grouper = new StartDateField().createNormalGrouper();
         const taskWithDate = new TaskBuilder().startDate('1970-01-01').build();
         const taskWithoutDate = new TaskBuilder().build();
 
         // Assert
         expect(grouper.grouper(taskWithDate)).toEqual(['1970-01-01 Thursday']);
         expect(grouper.grouper(taskWithoutDate)).toEqual(['No start date']);
+    });
+
+    it('should sort groups for StartDateField', () => {
+        const grouper = new StartDateField().createNormalGrouper();
+        const tasks = SampleTasks.withAllRepresentativeStartDates();
+
+        expect({ grouper, tasks }).groupHeadingsToBe([
+            '2023-05-30 Tuesday',
+            '2023-05-31 Wednesday',
+            '2023-06-01 Thursday',
+            'Invalid date',
+            'No start date',
+        ]);
     });
 });

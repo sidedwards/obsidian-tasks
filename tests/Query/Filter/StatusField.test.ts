@@ -96,9 +96,17 @@ describe('grouping by status', () => {
         ['- [!] a', ['Done']],
     ])('task "%s" should have groups: %s', (taskLine: string, groups: string[]) => {
         // Arrange
-        const grouper = new StatusField().createGrouper().grouper;
+        const grouper = new StatusField().createNormalGrouper().grouper;
 
         // Assert
         expect(grouper(fromLine({ line: taskLine }))).toEqual(groups);
+    });
+
+    it('should sort groups for StatusField', () => {
+        const grouper = new StatusField().createNormalGrouper();
+        const taskLines = ['- [ ] a', '- [x] a'];
+        const tasks = taskLines.map((taskLine) => fromLine({ line: taskLine }));
+
+        expect({ grouper, tasks }).groupHeadingsToBe(['Done', 'Todo']);
     });
 });

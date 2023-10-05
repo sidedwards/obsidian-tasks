@@ -4,6 +4,7 @@ import { CreatedDateField } from './Filter/CreatedDateField';
 import { DoneDateField } from './Filter/DoneDateField';
 import { DueDateField } from './Filter/DueDateField';
 import { ExcludeSubItemsField } from './Filter/ExcludeSubItemsField';
+import { FunctionField } from './Filter/FunctionField';
 import { HeadingField } from './Filter/HeadingField';
 import { PathField } from './Filter/PathField';
 import { PriorityField } from './Filter/PriorityField';
@@ -20,10 +21,9 @@ import { StatusNameField } from './Filter/StatusNameField';
 import { StatusTypeField } from './Filter/StatusTypeField';
 
 import { RecurrenceField } from './Filter/RecurrenceField';
-import type { FilterOrErrorMessage } from './Filter/Filter';
+import type { FilterOrErrorMessage } from './Filter/FilterOrErrorMessage';
 import type { Sorter } from './Sorter';
 import type { Grouper } from './Grouper';
-import { MultiTextField } from './Filter/MultiTextField';
 import { FolderField } from './Filter/FolderField';
 import { RootField } from './Filter/RootField';
 import { BacklinkField } from './Filter/BacklinkField';
@@ -33,7 +33,7 @@ import { BacklinkField } from './Filter/BacklinkField';
 // be kept last.
 // When adding new fields keep this order in mind, putting fields that are more specific before fields that
 // may contain them, and keep BooleanField last.
-const fieldCreators: EndsWith<BooleanField> = [
+export const fieldCreators: EndsWith<BooleanField> = [
     () => new StatusNameField(), // status.name is before status, to avoid ambiguity
     () => new StatusTypeField(), // status.type is before status, to avoid ambiguity
     () => new StatusField(),
@@ -56,6 +56,7 @@ const fieldCreators: EndsWith<BooleanField> = [
     () => new FilenameField(),
     () => new UrgencyField(),
     () => new RecurrenceField(),
+    () => new FunctionField(),
     () => new BooleanField(), // --- Please make sure to keep BooleanField last (see comment above) ---
 ];
 
@@ -82,7 +83,7 @@ export function parseSorter(sorterString: string): Sorter | null {
     // See if any of the fields can parse the line.
     for (const creator of fieldCreators) {
         const field = creator();
-        const sorter = field.parseSortLine(sorterString);
+        const sorter = field.createSorterFromLine(sorterString);
         if (sorter) {
             return sorter;
         }
@@ -102,19 +103,9 @@ export function parseGrouper(line: string): Grouper | null {
     // See if any of the fields can parse the line.
     for (const creator of fieldCreators) {
         const field = creator();
-        const fieldName = field.fieldNameSingular();
-        if (field.supportsGrouping()) {
-            if (line === `group by ${fieldName}`) {
-                return field.createGrouper();
-            }
-
-            // MultiTextField is written as a plural ('group by tags')
-            // See also MultiTextField.createGrouper()
-            if (field instanceof MultiTextField) {
-                if (line === `group by ${field.fieldNamePlural()}`) {
-                    return field.createGrouper();
-                }
-            }
+        const grouper = field.createGrouperFromLine(line);
+        if (grouper) {
+            return grouper;
         }
     }
     return null;

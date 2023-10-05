@@ -80,7 +80,7 @@ Each column shows a representative example task with the given status type.
 
 The tasks shown are purely examples for context. The `~` column is just an arbitrary example to show `NON_TASK`'s behaviour'. You can assign each of these types to any of your custom statuses.
 
-<!-- placeholder to force blank line before included text --> <!-- include: DocsSamplesForStatuses.test.Status_Transitions_status-types.approved.md -->
+<!-- placeholder to force blank line before included text --><!-- include: DocsSamplesForStatuses.test.Status_Transitions_status-types.approved.md -->
 
 | Operation and status.type | TODO | IN_PROGRESS | DONE | CANCELLED | NON_TASK |
 | ----- | ----- | ----- | ----- | ----- | ----- |
@@ -97,10 +97,7 @@ The tasks shown are purely examples for context. The `~` column is just an arbit
 | Matches `status.name includes done` | no | no | YES | no | no |
 | Matches `status.name includes cancelled` | no | no | no | YES | no |
 | Name for `group by status` | Todo | Done | Done | Done | Done |
-| Name for `group by status.type` | 2 TODO | 1 IN_PROGRESS | 3 DONE | 4 CANCELLED | 5 NON_TASK |
+| Name for `group by status.type` | %%2%%TODO | %%1%%IN_PROGRESS | %%3%%DONE | %%4%%CANCELLED | %%5%%NON_TASK |
 | Name for `group by status.name` | Todo | In Progress | Done | Cancelled | My custom status |
 
-<!-- placeholder to force blank line after included text --> <!-- endInclude -->
-
-> [!warning]
-The `group by status.type` results of the above table are subject to change.
+<!-- placeholder to force blank line after included text --><!-- endInclude -->

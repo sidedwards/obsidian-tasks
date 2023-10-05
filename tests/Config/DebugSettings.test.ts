@@ -17,22 +17,20 @@ describe('DebugSettings', () => {
 `;
         const tasks = createTasksFromMarkdown(tasksAsMarkdown, 'some_markdown_file', 'Some Heading');
 
-        const query = new Query({
-            source: `
+        const query = new Query(`
             sort by status
             explain
-        `,
-        }); // Would put Task 3 first
+        `); // Would put Task 3 first
 
         // Disable sort instructions
         updateSettings({ debugSettings: new DebugSettings(true) });
 
         // Act
-        const groups = query.applyQueryToTasks(tasks);
+        const queryResult = query.applyQueryToTasks(tasks);
 
         // Assert
-        expect(groups.groups.length).toEqual(1);
-        const soleTaskGroup = groups.groups[0];
+        expect(queryResult.groups.length).toEqual(1);
+        const soleTaskGroup = queryResult.groups[0];
         // Check that the tasks are found in the original order, not the order in the sort instruction
         expect('\n' + soleTaskGroup.tasksAsStringOfLines()).toStrictEqual(tasksAsMarkdown);
 

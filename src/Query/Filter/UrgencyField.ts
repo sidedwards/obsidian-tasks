@@ -1,7 +1,8 @@
 import type { Comparator } from '../Sorter';
 import type { Task } from '../../Task';
+import type { Grouper, GrouperFunction } from '../Grouper';
 import { Field } from './Field';
-import { FilterOrErrorMessage } from './Filter';
+import { FilterOrErrorMessage } from './FilterOrErrorMessage';
 
 /**
  * Support 'urgency' sorting.
@@ -25,6 +26,10 @@ export class UrgencyField extends Field {
         throw Error(`filterRegExp() unimplemented for ${this.fieldName()}`);
     }
 
+    // -----------------------------------------------------------------------------------------------------------------
+    // Sorting
+    // -----------------------------------------------------------------------------------------------------------------
+
     supportsSorting(): boolean {
         return true;
     }
@@ -34,5 +39,35 @@ export class UrgencyField extends Field {
             // Higher urgency should be sorted earlier.
             return b.urgency - a.urgency;
         };
+    }
+
+    // -----------------------------------------------------------------------------------------------------------------
+    // Grouping
+    // -----------------------------------------------------------------------------------------------------------------
+
+    public supportsGrouping(): boolean {
+        return true;
+    }
+
+    public grouper(): GrouperFunction {
+        // Note: Groups are sorted from low priority to high.
+        // This will be improved in a future release, by allowing
+        // the grouping code to take advantage of the comparator()
+        // method above.
+        return (task: Task) => {
+            return [`${task.urgency.toFixed(2)}`];
+        };
+    }
+
+    /**
+     * The {@link Field.createGrouper} creates a grouper that sorts by increasing values.
+     * For {@link UrgencyField} the group sorting shall be done by decreasing values, so
+     * the normal order here is the reverse of the regular one.
+     *
+     * @param reverse - false for normal group order (from most urgent to less urgent),
+     * true for reverse group order.
+     */
+    public createGrouper(reverse: boolean): Grouper {
+        return super.createGrouper(!reverse);
     }
 }

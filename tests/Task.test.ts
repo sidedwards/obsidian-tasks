@@ -9,11 +9,11 @@ import { GlobalFilter } from '../src/Config/GlobalFilter';
 import type { StatusCollection } from '../src/StatusCollection';
 import { StatusRegistry } from '../src/StatusRegistry';
 import { TaskLocation } from '../src/TaskLocation';
+import { StatusConfiguration, StatusType } from '../src/StatusConfiguration';
 import { fromLine } from './TestHelpers';
 import { TaskBuilder } from './TestingTools/TaskBuilder';
 import { RecurrenceBuilder } from './TestingTools/RecurrenceBuilder';
 
-jest.mock('obsidian');
 window.moment = moment;
 
 describe('parsing', () => {
@@ -31,12 +31,9 @@ describe('parsing', () => {
         expect(task!.listMarker).toEqual('-');
         expect(task!.description).toEqual('this is a done task');
         expect(task!.status).toStrictEqual(Status.DONE);
-        expect(task!.createdDate).not.toBeNull();
-        expect(task!.createdDate!.isSame(moment('2023-03-07', 'YYYY-MM-DD'))).toStrictEqual(true);
-        expect(task!.dueDate).not.toBeNull();
-        expect(task!.dueDate!.isSame(moment('2021-09-12', 'YYYY-MM-DD'))).toStrictEqual(true);
-        expect(task!.doneDate).not.toBeNull();
-        expect(task!.doneDate!.isSame(moment('2021-06-20', 'YYYY-MM-DD'))).toStrictEqual(true);
+        expect(task!.createdDate).toEqualMoment(moment('2023-03-07'));
+        expect(task!.dueDate).toEqualMoment(moment('2021-09-12'));
+        expect(task!.doneDate).toEqualMoment(moment('2021-06-20'));
         expect(task!.originalMarkdown).toStrictEqual(line);
         expect(task!.lineNumber).toEqual(0);
     });
@@ -53,6 +50,21 @@ describe('parsing', () => {
         // Assert
         expect(task).not.toBeNull();
         expect(task!.listMarker).toEqual('*');
+        expect(task!.originalMarkdown).toStrictEqual(line);
+    });
+
+    it('parses a task from a line starting with plus sign', () => {
+        // Arrange
+        const line = '+ [ ] this is a task in asterisk list';
+
+        // Act
+        const task = fromLine({
+            line,
+        });
+
+        // Assert
+        expect(task).not.toBeNull();
+        expect(task!.listMarker).toEqual('+');
         expect(task!.originalMarkdown).toStrictEqual(line);
     });
 
@@ -90,10 +102,9 @@ describe('parsing', () => {
         expect(task!.originalMarkdown).toStrictEqual(line);
     });
 
-    it('returns null when task does not have global filter', () => {
+    it('done not parse a task from a line starting with @ sign', () => {
         // Arrange
-        GlobalFilter.set('#task');
-        const line = '- [x] this is a done task 🗓 2021-09-12 ✅ 2021-06-20';
+        const line = '@ [ ] this is a task in asterisk list';
 
         // Act
         const task = fromLine({
@@ -102,9 +113,6 @@ describe('parsing', () => {
 
         // Assert
         expect(task).toBeNull();
-
-        // Cleanup
-        GlobalFilter.reset();
     });
 
     it('supports capitalised status characters', () => {
@@ -132,10 +140,11 @@ describe('parsing', () => {
         expect(task).not.toBeNull();
         expect(task!.description).toEqual('this is a ✅ done task');
         expect(task!.status).toStrictEqual(Status.DONE);
-        expect(task!.dueDate).not.toBeNull();
-        expect(task!.dueDate!.isSame(moment('2021-09-12', 'YYYY-MM-DD'))).toStrictEqual(true);
-        expect(task!.doneDate).not.toBeNull();
-        expect(task!.doneDate!.isSame(moment('2021-06-20', 'YYYY-MM-DD'))).toStrictEqual(true);
+        expect(task!.startDate).toBeNull();
+
+        // Note for docs: The following are actually Tasks-specific testers...
+        expect(task!.dueDate).toEqualMoment(moment('2021-09-12'));
+        expect(task!.doneDate).toEqualMoment(moment('2021-06-20'));
     });
     // end-snippet
 
@@ -152,10 +161,10 @@ describe('parsing', () => {
         expect(task).not.toBeNull();
         expect(task!.description).toEqual('this is a ✅ done task');
         expect(task!.status).toStrictEqual(Status.DONE);
-        expect(task!.dueDate).not.toBeNull();
-        expect(task!.dueDate!.isSame(moment('2021-09-12', 'YYYY-MM-DD'))).toStrictEqual(true);
-        expect(task!.doneDate).not.toBeNull();
-        expect(task!.doneDate!.isSame(moment('2021-06-20', 'YYYY-MM-DD'))).toStrictEqual(true);
+        // begin-snippet: test-moment-equality
+        expect(task!.dueDate).toEqualMoment(moment('2021-09-12'));
+        expect(task!.doneDate).toEqualMoment(moment('2021-06-20'));
+        // end-snippet
         expect(task!.blockLink).toEqual(' ^my-precious');
     });
 
@@ -172,8 +181,7 @@ describe('parsing', () => {
         expect(task).not.toBeNull();
         expect(task!.description).toEqual('this is a task due #inside_tag #some/tags_with_underscore');
         expect(task!.tags).toEqual(['#inside_tag', '#some/tags_with_underscore']);
-        expect(task!.dueDate).not.toBeNull();
-        expect(task!.dueDate!.isSame(moment('2021-09-12', 'YYYY-MM-DD'))).toEqual(true);
+        expect(task!.dueDate).toEqualMoment(moment('2021-09-12'));
         expect(task!.priority).toEqual(Priority.High);
     });
 
@@ -190,10 +198,10 @@ describe('parsing', () => {
         // Assert
         expect(task).not.toBeNull();
         expect(task!.description).toEqual('Wobble #tag1 #tag2 #tag3 #tag4 #tag5 #tag6 #tag7 #tag8 #tag9 #tag10');
-        expect(task!.dueDate!.isSame(moment('2022-07-02', 'YYYY-MM-DD'))).toEqual(true);
-        expect(task!.doneDate!.isSame(moment('2022-07-02', 'YYYY-MM-DD'))).toEqual(true);
-        expect(task!.startDate!.isSame(moment('2022-07-02', 'YYYY-MM-DD'))).toEqual(true);
-        expect(task!.scheduledDate!.isSame(moment('2022-07-02', 'YYYY-MM-DD'))).toEqual(true);
+        expect(task!.dueDate).toEqualMoment(moment('2022-07-02'));
+        expect(task!.doneDate).toEqualMoment(moment('2022-07-02'));
+        expect(task!.startDate).toEqualMoment(moment('2022-07-02'));
+        expect(task!.scheduledDate).toEqualMoment(moment('2022-07-02'));
         expect(task!.priority).toEqual(Priority.High);
         expect(task!.tags).toStrictEqual([
             '#tag1',
@@ -386,12 +394,19 @@ describe('parsing tags', () => {
             extractedTags: ['#tagone'],
             globalFilter: '',
         },
+        {
+            // Single # character should not be treated as a tag - see issue 1969
+            markdownTask: '- [ ] count the # of tomatoes #gardening',
+            expectedDescription: 'count the # of tomatoes #gardening',
+            extractedTags: ['#gardening'],
+            globalFilter: '',
+        },
     ])(
         'should parse "$markdownTask" and extract "$extractedTags"',
         ({ markdownTask, expectedDescription, extractedTags, globalFilter }) => {
             // Arrange
             if (globalFilter != '') {
-                GlobalFilter.set(globalFilter);
+                GlobalFilter.getInstance().set(globalFilter);
             }
 
             // Act
@@ -408,10 +423,203 @@ describe('parsing tags', () => {
 
             // Cleanup
             if (globalFilter != '') {
-                GlobalFilter.reset();
+                GlobalFilter.getInstance().reset();
             }
         },
     );
+});
+
+describe('task parsing VS global filter', () => {
+    afterEach(() => {
+        GlobalFilter.getInstance().reset();
+    });
+
+    it('returns null when task does not have global filter', () => {
+        // Arrange
+        GlobalFilter.getInstance().set('#task');
+        const line = '- [x] this is a done task 🗓 2021-09-12 ✅ 2021-06-20';
+
+        // Act
+        const task = fromLine({
+            line,
+        });
+
+        // Assert
+        expect(task).toBeNull();
+    });
+
+    it.each([
+        '#task - [ ] this is a task 🗓 2021-09-12',
+        '- #task [ ] this is a task 🗓 2021-09-12',
+        '- [#task] this is a task 🗓 2021-09-12',
+        '- [ #task ] this is a task 🗓 2021-09-12',
+    ])('should not parse task with global filter outside of the description: "%s"', (line: string) => {
+        // Arrange
+        GlobalFilter.getInstance().set('#task');
+
+        // Act
+        const task = fromLine({
+            line,
+        });
+
+        // Assert
+        expect(task).toBeNull();
+    });
+
+    it('should not consider task status when searching for global filter', () => {
+        // Arrange
+        GlobalFilter.getInstance().set('@');
+
+        // Act
+        const task = fromLine({
+            line: '- [@] Hello',
+        });
+
+        // Assert
+        expect(task).toBeNull();
+    });
+});
+
+describe('properties for scripting', () => {
+    it('should provide isDone for convenience', () => {
+        expect(new TaskBuilder().status(Status.makeTodo()).build().isDone).toEqual(false);
+        expect(new TaskBuilder().status(Status.makeInProgress()).build().isDone).toEqual(false);
+        expect(new TaskBuilder().status(Status.makeDone()).build().isDone).toEqual(true);
+        expect(new TaskBuilder().status(Status.makeCancelled()).build().isDone).toEqual(true);
+        expect(
+            new TaskBuilder()
+                .status(new Status(new StatusConfiguration('%', 'Non-task', ' ', true, StatusType.NON_TASK)))
+                .build().isDone,
+        ).toEqual(true);
+    });
+
+    it('should provide access to all date fields', () => {
+        const task = TaskBuilder.createFullyPopulatedTask();
+        expect(task.created.moment!).toEqualMoment(task.createdDate!);
+        expect(task.done.moment!).toEqualMoment(task.doneDate!);
+        expect(task.due.moment!).toEqualMoment(task.dueDate!);
+        expect(task.scheduled!.moment).toEqualMoment(task.scheduledDate!);
+        expect(task.start.moment!).toEqualMoment(task.startDate!);
+    });
+
+    it('should provide access to happens and happensDates', () => {
+        // Fields that are used by happens:
+        const dueDate = '2023-06-19';
+        const scheduledDate = '2023-06-20';
+        const startDate = '2023-06-21';
+        const task = new TaskBuilder().dueDate(dueDate).scheduledDate(scheduledDate).startDate(startDate).build();
+        expect(task.happensDates[0]).toEqualMoment(moment(startDate));
+        expect(task.happensDates[1]).toEqualMoment(moment(scheduledDate));
+        expect(task.happensDates[2]).toEqualMoment(moment(dueDate));
+        expect(task.happens.moment).toEqualMoment(moment(dueDate)!); // the earliest
+    });
+
+    it('happens should ignore non-contributing date fields', () => {
+        // other fields, that are ignored by happens:
+        const sampleDate = '2023-06-19';
+        expect(new TaskBuilder().createdDate(sampleDate).build().happens.moment).toBeNull();
+        expect(new TaskBuilder().doneDate(sampleDate).build().happens.moment).toBeNull();
+    });
+
+    it('should provide access to recurring-related properties', () => {
+        const non_recurring = '- [ ] non-recurring task';
+        const recurring = '- [ ] recurring 🔁 every day 📅 2022-06-17';
+        // Invalid recurrence rules are discarded, and treated as non-recurring
+        const invalid = '- [ ] recurring 🔁 invalid rule 📅 2022-06-17';
+
+        // Test Task.recurring
+        expect(fromLine({ line: non_recurring }).isRecurring).toEqual(false);
+        expect(fromLine({ line: recurring }).isRecurring).toEqual(true);
+        expect(fromLine({ line: invalid }).isRecurring).toEqual(false);
+
+        expect(fromLine({ line: non_recurring }).recurrenceRule).toEqual('');
+        expect(fromLine({ line: recurring }).recurrenceRule).toEqual('every day');
+        expect(fromLine({ line: invalid }).recurrenceRule).toEqual('');
+    });
+
+    it('should provide access to heading information', () => {
+        expect(new TaskBuilder().build().heading).toBeNull();
+        expect(new TaskBuilder().precedingHeader('my heading').build().heading).toEqual('my heading');
+
+        expect(new TaskBuilder().build().hasHeading).toEqual(false);
+        expect(new TaskBuilder().precedingHeader('my heading').build().hasHeading).toEqual(true);
+    });
+});
+
+describe('backlinks', () => {
+    function shouldGiveLinkText(
+        path: string,
+        heading: string | null,
+        filenameUnique: boolean,
+        expected: string | null,
+    ) {
+        expect(
+            new TaskBuilder()
+                .path(path)
+                .precedingHeader(heading)
+                .build()
+                .getLinkText({ isFilenameUnique: filenameUnique }),
+        ).toEqual(expected);
+    }
+
+    describe('valid and unique paths', () => {
+        it('valid, unique path without heading should use filename as backlink', () => {
+            shouldGiveLinkText('a/b/c.md', null, true, 'c');
+        });
+
+        it('valid, unique path with different heading should use filename and heading as backlink', () => {
+            shouldGiveLinkText('a/b/c.md', 'heading', true, 'c > heading');
+        });
+
+        it('valid, unique path with same heading should use just filename as backlink', () => {
+            shouldGiveLinkText('a/b/c.md', 'c', true, 'c');
+        });
+    });
+
+    describe('valid non-unique paths', () => {
+        it('valid, non-unique path without heading should use full path as backlink', () => {
+            shouldGiveLinkText('a/b/c.md', null, false, '/a/b/c.md');
+        });
+
+        it('valid, non-unique path with different heading should use full path and heading as backlink', () => {
+            shouldGiveLinkText('a/b/c.md', 'heading', false, '/a/b/c.md > heading');
+        });
+
+        it('valid, non-unique path with same heading as file name should use full path and heading as backlink', () => {
+            shouldGiveLinkText('a/b/c.md', 'c', false, '/a/b/c.md > c');
+        });
+
+        it('valid, non-unique path with same heading as path name with initial slash should use just the path as backlink', () => {
+            // This is not a realistic use-case, but is included to show the current behaviour of the code
+            shouldGiveLinkText('a/b/c.md', '/a/b/c.md', false, '/a/b/c.md');
+        });
+    });
+
+    describe('invalid unique paths', () => {
+        // use invalid file extension to generate null filename
+        // This is not a realistic use-case, but is included to show the current behaviour of the code
+
+        it('invalid, unique path without heading should give null for backlink', () => {
+            shouldGiveLinkText('a/b/c.markdown', null, true, null);
+        });
+
+        it('invalid, unique path with heading should give null for backlink', () => {
+            shouldGiveLinkText('a/b/c.markdown', 'heading', true, null);
+        });
+    });
+
+    describe('invalid non-unique paths', () => {
+        // use invalid file extension to generate null filename
+        // This is not a realistic use-case, but is included to show the current behaviour of the code
+
+        it('invalid, non-unique path without heading uses path anyway for backlink', () => {
+            shouldGiveLinkText('a/b/c.markdown', null, false, '/a/b/c.markdown');
+        });
+
+        it('invalid, non-unique path with heading uses path and backlink anyway for backlink', () => {
+            shouldGiveLinkText('a/b/c.markdown', 'heading', false, '/a/b/c.markdown > heading');
+        });
+    });
 });
 
 describe('to string', () => {
@@ -425,6 +633,7 @@ describe('to string', () => {
 
         // Assert
         expect(task).not.toBeNull();
+        expect(task.indentation).toEqual('> > > ');
         expect(task.toFileLineString()).toStrictEqual(line);
     });
 
@@ -464,8 +673,8 @@ describe('to string', () => {
     it('retains the global filter', () => {
         // Arrange
         const line = '- [ ] This is a task with #t as a global filter and also #t/some tags';
+        GlobalFilter.getInstance().set('#t');
 
-        updateSettings({ globalFilter: '#t' });
         // Act
         const task: Task = fromLine({
             line,
@@ -475,6 +684,7 @@ describe('to string', () => {
         const expectedLine = 'This is a task with #t as a global filter and also #t/some tags';
         expect(task.toString()).toStrictEqual(expectedLine);
         resetSettings();
+        GlobalFilter.getInstance().reset();
     });
 });
 
@@ -518,7 +728,6 @@ describe('toggle done', () => {
         // Assert
         expect(toggled).not.toBeNull();
         expect(toggled!.status).toStrictEqual(Status.DONE);
-        expect(toggled!.doneDate).not.toBeNull();
         expect(toggled!.status.symbol).toStrictEqual('x');
         expect(toggled!.blockLink).toEqual(' ^my-precious');
     });
@@ -924,8 +1133,7 @@ describe('toggle done', () => {
 
         // Assert
         expect(task).not.toBeNull();
-        expect(task!.dueDate).not.toBeNull();
-        expect(task!.dueDate!.isSame(moment('2021-09-12', 'YYYY-MM-DD'))).toStrictEqual(true);
+        expect(task!.dueDate).toEqualMoment(moment('2021-09-12'));
 
         const tasks = task!.toggle();
         expect(tasks.length).toEqual(2);
@@ -942,152 +1150,113 @@ describe('toggle done', () => {
     });
 });
 
-describe('set correct created date on reccurence task', () => {
-    it('does not set created date with disabled setting', () => {
+describe('created dates on recurring task', () => {
+    beforeEach(() => {
+        jest.useFakeTimers();
+        jest.setSystemTime(new Date('2023-03-08'));
+    });
+
+    afterEach(() => {
+        jest.useRealTimers();
+        resetSettings();
+        GlobalFilter.getInstance().reset();
+    });
+
+    it('should not set created date with disabled setting', () => {
         // Arrange
-        const line = '- [ ] this is a task 📅 2021-09-12 🔁 every day';
+        const line = '- [ ] this is a task 🔁 every day 📅 2021-09-12';
         updateSettings({ setCreatedDate: false });
 
         // Act
-        const task = fromLine({
-            line,
-        });
-
-        // Assert
-        expect(task).not.toBeNull();
-        expect(task!.createdDate).toBeNull();
-
-        const tasks = task!.toggle();
-        expect(tasks.length).toEqual(2);
-        const nextTask: Task = tasks[0];
-        expect(nextTask.createdDate).toBeNull();
-
-        // cleanup
-        resetSettings();
+        expect(line).toToggleTo([
+            '- [ ] this is a task 🔁 every day 📅 2021-09-13',
+            '- [x] this is a task 🔁 every day 📅 2021-09-12 ✅ 2023-03-08',
+        ]);
     });
 
-    it('does not set created date with disabled setting when repeated has created date', () => {
+    it('should not set created date if setting disabled, even if original has created date', () => {
         // Arrange
-        const line = '- [ ] this is a task ➕ 2021-09-11 📅 2021-09-12 🔁 every day';
+        const line = '- [ ] this is a task 🔁 every day ➕ 2021-09-11 📅 2021-09-12';
         updateSettings({ setCreatedDate: false });
 
         // Act
-        const task = fromLine({
-            line,
-        });
-
-        // Assert
-        expect(task).not.toBeNull();
-        expect(task!.createdDate).not.toBeNull();
-        expect(task!.createdDate!.isSame(moment('2021-09-11', 'YYYY-MM-DD'))).toStrictEqual(true);
-
-        const tasks = task!.toggle();
-        expect(tasks.length).toEqual(2);
-        const nextTask: Task = tasks[0];
-        expect(nextTask.createdDate).toBeNull();
-
-        // cleanup
-        resetSettings();
+        expect(line).toToggleTo([
+            '- [ ] this is a task 🔁 every day 📅 2021-09-13',
+            '- [x] this is a task 🔁 every day ➕ 2021-09-11 📅 2021-09-12 ✅ 2023-03-08',
+        ]);
     });
 
-    it('set created date with enabled setting', () => {
+    it('should set created date if setting enabled', () => {
         // Arrange
-        const today = '2023-03-08';
-        const todaySpy = jest.spyOn(Date, 'now').mockReturnValue(moment(today).valueOf());
-        const line = '- [ ] this is a task 📅 2021-09-12 🔁 every day';
+        const line = '- [ ] this is a task 🔁 every day 📅 2021-09-12';
         updateSettings({ setCreatedDate: true });
 
         // Act
-        const task = fromLine({
-            line,
-        });
-
-        // Assert
-        expect(task).not.toBeNull();
-        expect(task!.createdDate).toBeNull();
-
-        const tasks = task!.toggle();
-        expect(tasks.length).toEqual(2);
-        const nextTask: Task = tasks[0];
-        expect(nextTask.createdDate).not.toBeNull();
-        expect(nextTask!.createdDate!.isSame(moment(today, 'YYYY-MM-DD'))).toStrictEqual(true);
-
-        // cleanup
-        resetSettings();
-        todaySpy.mockClear();
+        expect(line).toToggleTo([
+            '- [ ] this is a task 🔁 every day ➕ 2023-03-08 📅 2021-09-13',
+            '- [x] this is a task 🔁 every day 📅 2021-09-12 ✅ 2023-03-08',
+        ]);
     });
 
-    it('set created date with enabled setting when repeated has created date', () => {
+    it('should set created date if setting enabled, when original has created date', () => {
         // Arrange
-        const today = '2023-03-08';
-        const todaySpy = jest.spyOn(Date, 'now').mockReturnValue(moment(today).valueOf());
-        const line = '- [ ] this is a task ➕ 2021-09-11 📅 2021-09-12 🔁 every day';
+        const line = '- [ ] this is a task 🔁 every day ➕ 2021-09-11 📅 2021-09-12';
         updateSettings({ setCreatedDate: true });
 
         // Act
-        const task = fromLine({
-            line,
-        });
-
-        // Assert
-        expect(task).not.toBeNull();
-        expect(task!.createdDate).not.toBeNull();
-        expect(task!.createdDate!.isSame(moment('2021-09-11', 'YYYY-MM-DD'))).toStrictEqual(true);
-
-        const tasks = task!.toggle();
-        expect(tasks.length).toEqual(2);
-        const nextTask: Task = tasks[0];
-        expect(nextTask.createdDate).not.toBeNull();
-        expect(nextTask!.createdDate!.isSame(moment(today, 'YYYY-MM-DD'))).toStrictEqual(true);
-
-        // cleanup
-        resetSettings();
-        todaySpy.mockClear();
+        expect(line).toToggleTo([
+            '- [ ] this is a task 🔁 every day ➕ 2023-03-08 📅 2021-09-13',
+            '- [x] this is a task 🔁 every day ➕ 2021-09-11 📅 2021-09-12 ✅ 2023-03-08',
+        ]);
     });
 });
 
-declare global {
-    namespace jest {
-        interface Matchers<R> {
-            toBeIdenticalTo(builder2: TaskBuilder): R;
-        }
+describe('order of recurring tasks', () => {
+    beforeAll(() => {
+        jest.useFakeTimers();
+        jest.setSystemTime(new Date(2023, 5 - 1, 16));
+        resetSettings();
+        GlobalFilter.getInstance().reset();
+    });
 
-        interface Expect {
-            toBeIdenticalTo(builder2: TaskBuilder): any;
-        }
+    afterAll(() => {
+        jest.useRealTimers();
+        resetSettings();
+        GlobalFilter.getInstance().reset();
+    });
 
-        interface InverseAsymmetricMatchers {
-            toBeIdenticalTo(builder2: TaskBuilder): any;
-        }
-    }
-}
+    it('should put new task before old, by default', () => {
+        const line = '- [ ] this is a recurring task 🔁 every day';
+        expect(line).toToggleWithRecurrenceInUsersOrderTo([
+            '- [ ] this is a recurring task 🔁 every day',
+            '- [x] this is a recurring task 🔁 every day ✅ 2023-05-16',
+        ]);
+    });
 
-export function toBeIdenticalTo(builder1: TaskBuilder, builder2: TaskBuilder) {
-    const task1 = builder1.build();
-    const task2 = builder2.build();
-    const pass = task1.identicalTo(task2);
+    it('should honour new-task-before-old setting', () => {
+        updateSettings({ recurrenceOnNextLine: false });
 
-    if (pass) {
-        return {
-            message: () => 'Tasks treated as identical, but should be different',
-            pass: true,
-        };
-    }
-    return {
-        message: () => {
-            return 'Tasks should be identical, but are treated as different';
-        },
-        pass: false,
-    };
-}
+        const line = '- [ ] this is a recurring task 🔁 every day';
+        expect(line).toToggleWithRecurrenceInUsersOrderTo([
+            '- [ ] this is a recurring task 🔁 every day',
+            '- [x] this is a recurring task 🔁 every day ✅ 2023-05-16',
+        ]);
+    });
 
-expect.extend({
-    toBeIdenticalTo,
+    it('should honour old-task-before-new setting', () => {
+        updateSettings({ recurrenceOnNextLine: true });
+
+        const line = '- [ ] this is a recurring task 🔁 every day';
+        expect(line).toToggleWithRecurrenceInUsersOrderTo([
+            '- [x] this is a recurring task 🔁 every day ✅ 2023-05-16',
+            '- [ ] this is a recurring task 🔁 every day',
+        ]);
+    });
 });
 
 describe('identicalTo', () => {
     it('should check status', () => {
-        const lhs = new TaskBuilder().status(Status.TODO);
+        const lhs = new TaskBuilder().status(Status.makeTodo());
         expect(lhs).toBeIdenticalTo(new TaskBuilder().status(Status.TODO));
         expect(lhs).not.toBeIdenticalTo(new TaskBuilder().status(Status.DONE));
     });
@@ -1210,6 +1379,26 @@ describe('identicalTo', () => {
         const lhs = new TaskBuilder().tags([]);
         expect(lhs).toBeIdenticalTo(new TaskBuilder().tags([]));
         expect(lhs).not.toBeIdenticalTo(new TaskBuilder().tags(['#stuff']));
+    });
+
+    it('should correctly compare a task with status read from user settings', () => {
+        // This was added when fixing:
+        // https://github.com/obsidian-tasks-group/obsidian-tasks/issues/2044
+        // Uncaught (in promise) TypeError: this.configuration.identicalTo is not a function
+
+        // 1 Create a task whose StatusConfiguration was created via new StatusConfiguration()
+        const task1 = new TaskBuilder().build();
+
+        // 2 Simulate a task whose status was read from StatusSettings:
+        //   Create a task whose StatusConfiguration was read from JSON.
+        //   Any methods on StatusConfiguration are not available via this route.
+        const task1Configuration = JSON.stringify(task1.status.configuration);
+        const task2Configuration = JSON.parse(task1Configuration);
+        const task2Status = new Status(task2Configuration);
+        const task2 = new TaskBuilder().status(task2Status).build();
+
+        expect(task2.status.identicalTo(task1.status)).toEqual(true);
+        expect(task2.identicalTo(task1)).toEqual(true);
     });
 });
 

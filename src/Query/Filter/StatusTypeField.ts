@@ -4,8 +4,9 @@ import { StatusType } from '../../StatusConfiguration';
 import type { Comparator } from '../Sorter';
 import { Explanation } from '../Explain/Explanation';
 import { Field } from './Field';
-import { Filter, FilterOrErrorMessage } from './Filter';
+import { Filter } from './Filter';
 import type { FilterFunction } from './Filter';
+import { FilterOrErrorMessage } from './FilterOrErrorMessage';
 
 /**
  * A ${@link Field} implementation for searching status.type
@@ -112,28 +113,6 @@ export class StatusTypeField extends Field {
     }
 
     private static groupName(task: Task) {
-        let prefix: string;
-        // Add a numeric prefix to sort in to a meaningful order for users
-        switch (task.status.type) {
-            case StatusType.IN_PROGRESS:
-                prefix = '1';
-                break;
-            case StatusType.TODO:
-                prefix = '2';
-                break;
-            case StatusType.DONE:
-                prefix = '3';
-                break;
-            case StatusType.CANCELLED:
-                prefix = '4';
-                break;
-            case StatusType.NON_TASK:
-                prefix = '5';
-                break;
-            case StatusType.EMPTY:
-                prefix = '6';
-                break;
-        }
-        return prefix + ' ' + task.status.type;
+        return task.status.typeGroupText;
     }
 }

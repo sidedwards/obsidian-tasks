@@ -75,8 +75,21 @@ export class Status {
      *
      * @type {string}
      * @memberof Status
+     * @see nextSymbol
      */
     public get nextStatusSymbol(): string {
+        return this.configuration.nextStatusSymbol;
+    }
+
+    /**
+     * Returns the next status for a task when toggled.
+     * This is an alias for {@link nextStatusSymbol} which is provided for brevity in user scripts.
+     *
+     * @type {string}
+     * @memberof Status
+     * @see nextStatusSymbol
+     */
+    public get nextSymbol(): string {
         return this.configuration.nextStatusSymbol;
     }
 
@@ -95,6 +108,41 @@ export class Status {
      */
     public get type(): StatusType {
         return this.configuration.type;
+    }
+
+    /**
+     * Returns the text to be used to represent the {@link StatusType} in group headings.
+     *
+     * The status types are in the same order as given by 'group by status.type'.
+     * This is provided as a convenience for use in custom grouping.
+     */
+    public get typeGroupText(): string {
+        const type = this.type;
+        let prefix: string;
+        // Add a numeric prefix to sort in to a meaningful order for users
+        switch (type) {
+            case StatusType.IN_PROGRESS:
+                prefix = '1';
+                break;
+            case StatusType.TODO:
+                prefix = '2';
+                break;
+            case StatusType.DONE:
+                prefix = '3';
+                break;
+            case StatusType.CANCELLED:
+                prefix = '4';
+                break;
+            case StatusType.NON_TASK:
+                prefix = '5';
+                break;
+            case StatusType.EMPTY:
+                prefix = '6';
+                break;
+        }
+        // Text inside the %%..%% comments is used to control the sorting in both sorting of tasks and naming of groups.
+        // The comments are hidden by Obsidian when the headings are rendered.
+        return `%%${prefix}%%${type}`;
     }
 
     /**
@@ -209,6 +257,27 @@ export class Status {
      */
     public isCompleted(): boolean {
         return this.type === StatusType.DONE;
+    }
+
+    /**
+     * Compare all the fields in another Status, to detect any differences from this one.
+     *
+     * If any field is different in any way, it will return false.
+     *
+     * @param other
+     */
+    public identicalTo(other: Status): boolean {
+        const args: Array<keyof StatusConfiguration> = [
+            'symbol',
+            'name',
+            'nextStatusSymbol',
+            'availableAsCommand',
+            'type',
+        ];
+        for (const el of args) {
+            if (this[el] !== other[el]) return false;
+        }
+        return true;
     }
 
     /**

@@ -4,7 +4,7 @@ import { StatusField } from '../../src/Query/Filter/StatusField';
 import { Status } from '../../src/Status';
 import type { Task } from '../../src/Task';
 import { StatusConfiguration, StatusType } from '../../src/StatusConfiguration';
-import type { FilterOrErrorMessage } from '../../src/Query/Filter/Filter';
+import type { FilterOrErrorMessage } from '../../src/Query/Filter/FilterOrErrorMessage';
 import * as FilterParser from '../../src/Query/FilterParser';
 import { StatusNameField } from '../../src/Query/Filter/StatusNameField';
 import { StatusTypeField } from '../../src/Query/Filter/StatusTypeField';
@@ -208,9 +208,9 @@ function verifyTransitionsAsMarkdownTable(statuses: Status[]) {
         table.addRow(cells);
     }
 
-    showGroupNamesForAllTasks('status', new StatusField().createGrouper().grouper);
-    showGroupNamesForAllTasks('status.type', new StatusTypeField().createGrouper().grouper);
-    showGroupNamesForAllTasks('status.name', new StatusNameField().createGrouper().grouper);
+    showGroupNamesForAllTasks('status', new StatusField().createNormalGrouper().grouper);
+    showGroupNamesForAllTasks('status.type', new StatusTypeField().createNormalGrouper().grouper);
+    showGroupNamesForAllTasks('status.name', new StatusNameField().createNormalGrouper().grouper);
 
     table.verifyForDocs();
 }

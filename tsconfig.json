@@ -16,6 +16,8 @@
     "noImplicitAny": true,
     "moduleResolution": "node",
     "importHelpers": true,
+    "ignoreDeprecations": "5.0",
+    "outDir": "generated",
     "paths": {
       "src": [
         "src/*",

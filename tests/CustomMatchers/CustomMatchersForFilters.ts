@@ -1,6 +1,6 @@
 import { diff } from 'jest-diff';
 import type { Task } from '../../src/Task';
-import type { FilterOrErrorMessage } from '../../src/Query/Filter/Filter';
+import type { FilterOrErrorMessage } from '../../src/Query/Filter/FilterOrErrorMessage';
 import { fromLine } from '../TestHelpers';
 import { TaskBuilder } from '../TestingTools/TaskBuilder';
 import type { StatusConfiguration } from '../../src/StatusConfiguration';
@@ -67,6 +67,7 @@ declare global {
             toHaveExplanation(expectedExplanation: string): R;
             toMatchTask(task: Task): R;
             toMatchTaskFromLine(line: string): R;
+            toMatchTaskWithDescription(description: string): R;
             toMatchTaskWithHeading(heading: string | null): R;
             toMatchTaskWithPath(path: string): R;
             toMatchTaskWithStatus(statusConfiguration: StatusConfiguration): R;
@@ -77,6 +78,7 @@ declare global {
             toHaveExplanation(expectedExplanation: string): any;
             toMatchTask(task: Task): any;
             toMatchTaskFromLine(line: string): any;
+            toMatchTaskWithDescription(description: string): any;
             toMatchTaskWithHeading(heading: string | null): any;
             toMatchTaskWithPath(path: string): any;
             toMatchTaskWithStatus(statusConfiguration: StatusConfiguration): any;
@@ -87,6 +89,7 @@ declare global {
             toHaveExplanation(expectedExplanation: string): any;
             toMatchTask(task: Task): any;
             toMatchTaskFromLine(line: string): any;
+            toMatchTaskWithDescription(description: string): any;
             toMatchTaskWithHeading(heading: string | null): any;
             toMatchTaskWithPath(path: string): any;
             toMatchTaskWithStatus(statusConfiguration: StatusConfiguration): any;
@@ -98,20 +101,24 @@ export function toBeValid(filter: FilterOrErrorMessage) {
     if (filter.filterFunction === undefined) {
         return {
             message: () =>
-                `unexpected null filter: check your instruction matches your filter class.\n       Error message is "${filter.error}".`,
+                `unexpected null filter: check your instruction matches your filter class.
+       Line is "${filter.instruction}
+       Error message is "${filter.error}".`,
             pass: false,
         };
     }
 
     if (filter.error !== undefined) {
         return {
-            message: () => 'unexpected error message in filter: check your instruction matches your filter class',
+            message: () => `unexpected error message in filter: check your instruction matches your filter class
+       Line is "${filter.instruction}`,
             pass: false,
         };
     }
 
     return {
-        message: () => 'filter is unexpectedly valid',
+        message: () => `filter is unexpectedly valid:
+       Line is "${filter.instruction}`,
         pass: true,
     };
 }
@@ -138,13 +145,17 @@ export function toMatchTask(filter: FilterOrErrorMessage, task: Task) {
     const matches = filter.filterFunction!(task);
     if (!matches) {
         return {
-            message: () => `unexpected failure to match task: ${task.toFileLineString()}`,
+            message: () => `unexpected failure to match
+task:        "${task.toFileLineString()}"
+with filter: "${filter.instruction}"`,
             pass: false,
         };
     }
 
     return {
-        message: () => `filter should not have matched task: ${task.toFileLineString()}`,
+        message: () => `filter should not have matched
+task:        "${task.toFileLineString()}"
+with filter: "${filter.instruction}"`,
         pass: true,
     };
 }
@@ -153,6 +164,12 @@ export function toMatchTaskFromLine(filter: FilterOrErrorMessage, line: string) 
     const task = fromLine({
         line: line,
     });
+    return toMatchTask(filter, task);
+}
+
+export function toMatchTaskWithDescription(filter: FilterOrErrorMessage, description: string) {
+    const builder = new TaskBuilder();
+    const task = builder.description(description).build();
     return toMatchTask(filter, task);
 }
 

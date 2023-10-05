@@ -1,5 +1,5 @@
 import { FolderField } from '../../../src/Query/Filter/FolderField';
-import { fromLine } from '../../TestHelpers';
+import { SampleTasks, fromLine } from '../../TestHelpers';
 
 describe('folder', () => {
     it('should provide access to the folder', () => {
@@ -43,9 +43,18 @@ describe('grouping by folder', () => {
         ['- [ ] a', 'a.md', ['/']],
     ])('task "%s" with path "%s" should have groups: %s', (taskLine: string, path: string, groups: string[]) => {
         // Arrange
-        const grouper = new FolderField().createGrouper().grouper;
+        const grouper = new FolderField().createNormalGrouper().grouper;
 
         // Assert
         expect(grouper(fromLine({ line: taskLine, path: path }))).toEqual(groups);
+    });
+
+    it('should sort groups for FolderField', () => {
+        // Arrange
+        const tasks = SampleTasks.withAllRootsPathsHeadings();
+        const grouper = new FolderField().createNormalGrouper();
+
+        // Assert
+        expect({ grouper, tasks }).groupHeadingsToBe(['/', 'a/', 'a/b/', 'a/d/', 'e/d/']);
     });
 });

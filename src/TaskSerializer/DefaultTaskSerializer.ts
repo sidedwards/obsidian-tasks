@@ -13,9 +13,11 @@ import type { TaskDetails, TaskSerializer } from '.';
  */
 export interface DefaultTaskSerializerSymbols {
     readonly prioritySymbols: {
+        Highest: string;
         High: string;
         Medium: string;
         Low: string;
+        Lowest: string;
         None: string;
     };
     readonly startDateSymbol: string;
@@ -41,9 +43,11 @@ export interface DefaultTaskSerializerSymbols {
  */
 export const DEFAULT_SYMBOLS: DefaultTaskSerializerSymbols = {
     prioritySymbols: {
+        Highest: '🔺',
         High: '⏫',
         Medium: '🔼',
         Low: '🔽',
+        Lowest: '⏬',
         None: '',
     },
     startDateSymbol: '🛫',
@@ -55,7 +59,7 @@ export const DEFAULT_SYMBOLS: DefaultTaskSerializerSymbols = {
     TaskFormatRegularExpressions: {
         // The following regex's end with `$` because they will be matched and
         // removed from the end until none are left.
-        priorityRegex: /([⏫🔼🔽])$/u,
+        priorityRegex: /([🔺⏫🔼🔽⏬])$/u,
         startDateRegex: /🛫 *(\d{4}-\d{2}-\d{2})$/u,
         createdDateRegex: /➕ *(\d{4}-\d{2}-\d{2})$/u,
         scheduledDateRegex: /[⏳⌛] *(\d{4}-\d{2}-\d{2})$/u,
@@ -77,7 +81,7 @@ export class DefaultTaskSerializer implements TaskSerializer {
     public serialize(task: Task): string {
         const taskLayout = new TaskLayout();
         let taskString = '';
-        for (const component of taskLayout.layoutComponents) {
+        for (const component of taskLayout.shownTaskLayoutComponents) {
             taskString += this.componentToString(task, taskLayout, component);
         }
         return taskString;
@@ -103,12 +107,16 @@ export class DefaultTaskSerializer implements TaskSerializer {
             case 'priority': {
                 let priority: string = '';
 
-                if (task.priority === Priority.High) {
+                if (task.priority === Priority.Highest) {
+                    priority = ' ' + prioritySymbols.Highest;
+                } else if (task.priority === Priority.High) {
                     priority = ' ' + prioritySymbols.High;
                 } else if (task.priority === Priority.Medium) {
                     priority = ' ' + prioritySymbols.Medium;
                 } else if (task.priority === Priority.Low) {
                     priority = ' ' + prioritySymbols.Low;
+                } else if (task.priority === Priority.Lowest) {
+                    priority = ' ' + prioritySymbols.Lowest;
                 }
                 return priority;
             }
@@ -160,12 +168,16 @@ export class DefaultTaskSerializer implements TaskSerializer {
     protected parsePriority(p: string): Priority {
         const { prioritySymbols } = this.symbols;
         switch (p) {
+            case prioritySymbols.Lowest:
+                return Priority.Lowest;
             case prioritySymbols.Low:
                 return Priority.Low;
             case prioritySymbols.Medium:
                 return Priority.Medium;
             case prioritySymbols.High:
                 return Priority.High;
+            case prioritySymbols.Highest:
+                return Priority.Highest;
             default:
                 return Priority.None;
         }

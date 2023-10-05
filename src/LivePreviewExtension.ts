@@ -64,7 +64,8 @@ class LivePreviewExtension implements PluginValue {
             fallbackDate: null,
         });
 
-        console.debug(`Live Preview Extension: toggle called. Position: ${position} Line: ${line.text}`);
+        // Temporary edit - See https://github.com/obsidian-tasks-group/obsidian-tasks/issues/2160
+        // console.debug(`Live Preview Extension: toggle called. Position: ${position} Line: ${line.text}`);
 
         // Only handle checkboxes of tasks.
         if (task === null) {
@@ -75,7 +76,7 @@ class LivePreviewExtension implements PluginValue {
         event.preventDefault();
 
         // Clicked on a task's checkbox. Toggle the task and set it.
-        const toggled = task.toggle();
+        const toggled = task.toggleWithRecurrenceInUsersOrder();
         const toggledString = toggled.map((t) => t.toFileLineString()).join(state.lineBreak);
 
         // Creates a CodeMirror transaction in order to update the document.

@@ -1,4 +1,7 @@
+// begin-snippet: declare-Moment-type-in-src
 import type { Moment } from 'moment';
+// end-snippet
+
 import { RRule } from 'rrule';
 import { compareByDate } from './lib/DateTools';
 
@@ -97,8 +100,12 @@ export class Recurrence {
                     dueDate,
                 });
             }
-        } catch (error) {
+        } catch (e) {
             // Could not read recurrence rule. User possibly not done typing.
+            // Print error message, as it is useful if a test file has not set up window.moment
+            if (e instanceof Error) {
+                console.log(e.message);
+            }
         }
 
         return null;
@@ -191,7 +198,9 @@ export class Recurrence {
     private nextReferenceDate(): Date {
         if (this.baseOnToday) {
             // The next occurrence should happen based off the current date.
+            // begin-snippet: use-moment-in-src
             const today = window.moment();
+            // end-snippet
             return this.nextReferenceDateFromToday(today).toDate();
         } else {
             return this.nextReferenceDateFromOriginalReferenceDate().toDate();
@@ -279,7 +288,7 @@ export class Recurrence {
         skippingMonths: string | undefined,
     ): Moment {
         // Parse `skippingMonths`, if it exists.
-        let parsedSkippingMonths: Number = 1;
+        let parsedSkippingMonths: number = 1;
         if (skippingMonths !== undefined) {
             parsedSkippingMonths = Number.parseInt(skippingMonths.trim(), 10);
         }
@@ -297,7 +306,7 @@ export class Recurrence {
     /**
      * isSkippingTooManyMonths returns true if `next` is more than `skippingMonths` months after `after`.
      */
-    private static isSkippingTooManyMonths(after: Moment, next: Moment, skippingMonths: Number): boolean {
+    private static isSkippingTooManyMonths(after: Moment, next: Moment, skippingMonths: number): boolean {
         let diffMonths = next.month() - after.month();
 
         // Maybe some years have passed?
@@ -319,7 +328,7 @@ export class Recurrence {
         skippingYears: string | undefined,
     ): Moment {
         // Parse `skippingYears`, if it exists.
-        let parsedSkippingYears: Number = 1;
+        let parsedSkippingYears: number = 1;
         if (skippingYears !== undefined) {
             parsedSkippingYears = Number.parseInt(skippingYears.trim(), 10);
         }
@@ -337,7 +346,7 @@ export class Recurrence {
     /**
      * isSkippingTooManyYears returns true if `next` is more than `skippingYears` years after `after`.
      */
-    private static isSkippingTooManyYears(after: Moment, next: Moment, skippingYears: Number): boolean {
+    private static isSkippingTooManyYears(after: Moment, next: Moment, skippingYears: number): boolean {
         const diff = next.year() - after.year();
 
         return diff > skippingYears;
