@@ -59,7 +59,7 @@ export const DEFAULT_SYMBOLS: DefaultTaskSerializerSymbols = {
     TaskFormatRegularExpressions: {
         // The following regex's end with `$` because they will be matched and
         // removed from the end until none are left.
-        priorityRegex: /([🔥🚨🟢💤🔮])$/u,
+        priorityRegex: /([🔥🚨🟢💤🔮])/u,
         startDateRegex: /🛫 *(\d{4}-\d{2}-\d{2})$/u,
         createdDateRegex: /➕ *(\d{4}-\d{2}-\d{2})$/u,
         scheduledDateRegex: /[⏳⌛] *(\d{4}-\d{2}-\d{2})$/u,
