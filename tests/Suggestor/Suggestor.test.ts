@@ -68,7 +68,18 @@ describe.each([
         const originalSettings = getSettings();
         const line = '- [ ] ';
         const suggestions: SuggestInfo[] = buildSuggestions(line, 5, originalSettings);
+<<<<<<< HEAD
         verifyAsJson(suggestions);
+=======
+        expect(suggestions).toEqual([
+            { suggestionType: 'empty', displayText: '⏎', appendText: '\n' },
+            { displayText: `${dueDateSymbol} due date`, appendText: `${dueDateSymbol} ` },
+            { displayText: `${startDateSymbol} start date`, appendText: `${startDateSymbol} ` },
+            { displayText: `${scheduledDateSymbol} scheduled date`, appendText: `${scheduledDateSymbol} ` },
+            { displayText: `${prioritySymbols.High} high priority`, appendText: `${prioritySymbols.High} ` },
+            { displayText: `${prioritySymbols.Normal} medium priority`, appendText: `${prioritySymbols.Normal} ` },
+        ]);
+>>>>>>> main
     });
 
     it('offers generic due date completions', () => {

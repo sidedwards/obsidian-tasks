@@ -21,7 +21,7 @@ This means that the priority of 🔽 low tasks is considered lower than the prio
 The idea is that you can easily filter out unimportant tasks without needing to assign a priority to all relevant tasks.
 
 ```markdown
-- [ ] take out the trash 🔼
+- [ ] take out the trash 🟢
 ```
 
 > [!released]

@@ -31,8 +31,13 @@ The following tasks block lists any tasks that have emoji in the description, wh
 <!-- include: ValidateTasks.test.validate-tasks_find-unread-emojis.approved.text -->
 ````text
 ```tasks
+<<<<<<< HEAD
 # These instructions need to be all on one line:
 (description includes 🔺) OR (description includes ⏫) OR (description includes 🔼) OR (description includes 🔽) OR (description includes ⏬) OR (description includes 🛫) OR (description includes ➕) OR (description includes ⏳) OR (description includes 📅) OR (description includes ✅) OR (description includes ❌) OR (description includes 🔁) OR (description includes ⛔) OR (description includes 🆔)
+=======
+# These description instructions need to be all on one line:
+(description includes 🔥 ) OR (description includes 🟢 ) OR (description includes 💤 ) OR (description includes 📅 ) OR (description includes ⏳ ) OR (description includes 🛫 ) OR (description includes ✅ ) OR (description includes 🔁 )
+>>>>>>> main
 
 # Optionally, uncomment this line and exclude your templates location
 # path does not include _templates

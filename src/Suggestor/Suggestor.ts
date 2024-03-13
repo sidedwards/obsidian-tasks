@@ -109,7 +109,7 @@ function addTaskPropertySuggestions(
         });
     if (!hasPriority(line)) {
         const prioritySymbols: { [key: string]: string } = symbols.prioritySymbols;
-        const priorityTexts = ['High', 'Medium', 'Low', 'Highest', 'Lowest'];
+        const priorityTexts = ['High', 'Normal', 'Low', 'Critical', 'Wishlist'];
 
         for (let i = 0; i < priorityTexts.length; i++) {
             const priorityText = priorityTexts[i];

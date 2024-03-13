@@ -94,10 +94,10 @@
             accessKey: string,
             accessKeyIndex: number}[] =
         [{
-            value: 'lowest',
-            label: 'Lowest',
-            symbol: prioritySymbols.Lowest,
-            accessKey: 'o',
+            value: 'wishlist',
+            label: 'Wishlist',
+            symbol: prioritySymbols.Wishlist,
+            accessKey: 'w',
             accessKeyIndex: 1
         }, {
             value: 'low',
@@ -107,15 +107,15 @@
             accessKeyIndex: 0
         }, {
             value: 'none',
-            label: 'Normal',
+            label: 'None',
             symbol: prioritySymbols.None,
-            accessKey: 'n',
+            accessKey: '0',
             accessKeyIndex: 0
         }, {
-            value: 'medium',
-            label: 'Medium',
-            symbol: prioritySymbols.Medium,
-            accessKey: 'm',
+            value: 'normal',
+            label: 'Normal',
+            symbol: prioritySymbols.Normal,
+            accessKey: 'n',
             accessKeyIndex: 0
         }, {
             value: 'high',
@@ -124,10 +124,10 @@
             accessKey: 'h',
             accessKeyIndex: 0
         }, {
-            value: 'highest',
-            label: 'Highest',
-            symbol: prioritySymbols.Highest,
-            accessKey: 'i',
+            value: 'critical',
+            label: 'Critical',
+            symbol: prioritySymbols.Critical,
+            accessKey: 'c',
             accessKeyIndex: 1
         }]
 
@@ -240,16 +240,16 @@
             addGlobalFilterOnSave = true;
         }
         let priority: typeof editableTask.priority = 'none';
-        if (task.priority === Priority.Lowest) {
-            priority = 'lowest';
+        if (task.priority === Priority.Wishlist) {
+            priority = 'wishlist';
         } else if (task.priority === Priority.Low) {
             priority = 'low';
-        } else if (task.priority === Priority.Medium) {
-            priority = 'medium';
+        } else if (task.priority === Priority.Normal) {
+            priority = 'normal';
         } else if (task.priority === Priority.High) {
             priority = 'high';
-        } else if (task.priority === Priority.Highest) {
-            priority = 'highest';
+        } else if (task.priority === Priority.Critical) {
+            priority = 'critical';
         }
 
         const blockedBy: Task[] = [];
@@ -343,20 +343,20 @@
 
         let parsedPriority: Priority;
         switch (editableTask.priority) {
-            case 'lowest':
-                parsedPriority = Priority.Lowest;
+            case 'wishlist':
+                parsedPriority = Priority.Wishlist;
                 break;
             case 'low':
                 parsedPriority = Priority.Low;
                 break;
-            case 'medium':
-                parsedPriority = Priority.Medium;
+            case 'normal':
+                parsedPriority = Priority.Normal;
                 break;
             case 'high':
                 parsedPriority = Priority.High;
                 break;
-            case 'highest':
-                parsedPriority = Priority.Highest;
+            case 'critical':
+                parsedPriority = Priority.Critical;
                 break;
             default:
                 parsedPriority = Priority.None;
