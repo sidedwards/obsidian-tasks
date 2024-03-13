@@ -5,7 +5,7 @@ export type EditableTask = {
     // NEW_TASK_FIELD_EDIT_REQUIRED
     description: string;
     status: Status;
-    priority: 'none' | 'lowest' | 'low' | 'medium' | 'high' | 'highest';
+    priority: 'none' | 'wishlist' | 'low' | 'normal' | 'high' | 'critical';
     recurrenceRule: string;
     createdDate: string;
     startDate: string;

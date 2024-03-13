@@ -19,7 +19,7 @@ _Note that this is a screenshot of the reminder plugin's settings and not Tasks.
 The order is important when writing the task. Tasks requires the reminder date after the task description and before any other Tasks fields. Reminders [requires no content between the reminder date and the due date](https://uphy.github.io/obsidian-reminder/guide/interop-tasks.html#distinguish-due-date-and-reminder-date).
 
 ```markdown
-- [ ] #task task name ⏰ YYYY-MM-DD HH:mm 📅 YYYY-MM-DD ⏫ 🔁 every week 🛫 YYYY-MM-DD ⏳ YYYY-MM-DD
+- [ ] #task task name ⏰ YYYY-MM-DD HH:mm 📅 YYYY-MM-DD 🔥 🔁 every week 🛫 YYYY-MM-DD ⏳ YYYY-MM-DD
 ```
 
 ---
