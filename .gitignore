@@ -59,3 +59,7 @@ yarn-error.log
 
 # Obsidian's hot reload plugin marker file
 .hotreload
+package-lock.json
+
+# .sync-work/ holds temp artifacts during fork sync (see CUSTOMIZATIONS.md)
+.sync-work/

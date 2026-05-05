@@ -1,0 +1,422 @@
+diff --git a/src/Query/Filter/PriorityField.ts b/src/Query/Filter/PriorityField.ts
+index 492f7dadc..3916d34e2 100644
+--- a/src/Query/Filter/PriorityField.ts
++++ b/src/Query/Filter/PriorityField.ts
+@@ -13,7 +13,7 @@ export class PriorityField extends Field {
+     //  (leading-white-space-in-outer-capture-group(values-to-use-are-in-inner-capture-group))
+     // The capture groups are numbered in the order of their opening brackets, from left to right.
+     private static readonly priorityRegexp =
+-        /^priority(\s+is)?(\s+(above|below|not))?(\s+(lowest|low|none|medium|high|highest))$/i;
++        /^priority(\s+is)?(\s+(above|below|not))?(\s+(wishlist|low|none|normal|high|critical))$/;
+ 
+     createFilterOrErrorMessage(line: string): FilterOrErrorMessage {
+         const priorityMatch = Field.getMatch(this.filterRegExp(), line);
+@@ -21,9 +21,9 @@ export class PriorityField extends Field {
+             const filterPriorityString = priorityMatch[5];
+             let filterPriority: Priority | null = null;
+ 
+-            switch (filterPriorityString.toLowerCase()) {
+-                case 'lowest':
+-                    filterPriority = Priority.Lowest;
++            switch (filterPriorityString) {
++                case 'wishlist':
++                    filterPriority = Priority.Wishlist;
+                     break;
+                 case 'low':
+                     filterPriority = Priority.Low;
+@@ -31,14 +31,14 @@ export class PriorityField extends Field {
+                 case 'none':
+                     filterPriority = Priority.None;
+                     break;
+-                case 'medium':
+-                    filterPriority = Priority.Medium;
++                case 'normal':
++                    filterPriority = Priority.Normal;
+                     break;
+                 case 'high':
+                     filterPriority = Priority.High;
+                     break;
+-                case 'highest':
+-                    filterPriority = Priority.Highest;
++                case 'critical':
++                    filterPriority = Priority.Critical;
+                     break;
+             }
+ 
+diff --git a/src/Suggestor/Suggestor.ts b/src/Suggestor/Suggestor.ts
+index 40ff2c736..3ea824f71 100644
+--- a/src/Suggestor/Suggestor.ts
++++ b/src/Suggestor/Suggestor.ts
+@@ -190,7 +190,7 @@ function addPrioritySuggestions(
+         Object.values(symbols.prioritySymbols).some((value) => value.length > 0 && line.includes(value));
+     if (!hasPriority(parameters.line)) {
+         const prioritySymbols: { [key: string]: string } = symbols.prioritySymbols;
+-        const priorityTexts = ['High', 'Medium', 'Low', 'Highest', 'Lowest'];
++        const priorityTexts = ['High', 'Normal', 'Low', 'Critical', 'Wishlist'];
+ 
+         for (const priorityText of priorityTexts) {
+             const prioritySymbol = prioritySymbols[priorityText];
+diff --git a/src/Task/Priority.ts b/src/Task/Priority.ts
+index 83c85d6f6..4d48cf789 100644
+--- a/src/Task/Priority.ts
++++ b/src/Task/Priority.ts
+@@ -9,10 +9,10 @@
+  * @enum {number}
+  */
+ export enum Priority {
+-    Highest = '0',
++    Critical = '0',
+     High = '1',
+-    Medium = '2',
++    Normal = '2',
+     None = '3',
+     Low = '4',
+-    Lowest = '5',
++    Wishlist = '5',
+ }
+diff --git a/src/Task/Task.ts b/src/Task/Task.ts
+index ab0b52082..0625c2301 100644
+--- a/src/Task/Task.ts
++++ b/src/Task/Task.ts
+@@ -616,7 +616,7 @@ export class Task extends ListItem {
+      * Returns the text to be used to represent the {@link priority} in group headings.
+      *
+      * Hidden text is used to sort the priorities in decreasing order, from
+-     * {@link Priority.Highest} to {@link Priority.Lowest}.
++     * {@link Priority.Critical} to {@link Priority.Wishlist}.
+      */
+     public get priorityNameGroupText(): string {
+         const priorityName = PriorityTools.priorityNameUsingNormal(this.priority);
+diff --git a/src/Task/Urgency.ts b/src/Task/Urgency.ts
+index 89ee15d9f..e8d3f1638 100644
+--- a/src/Task/Urgency.ts
++++ b/src/Task/Urgency.ts
+@@ -43,20 +43,20 @@ export class Urgency {
+         }
+ 
+         switch (task.priority) {
+-            case Priority.Highest:
++            case Priority.Critical:
+                 urgency += 1.5 * Urgency.priorityCoefficient;
+                 break;
+             case Priority.High:
+                 urgency += 1.0 * Urgency.priorityCoefficient;
+                 break;
+-            case Priority.Medium:
++            case Priority.Normal:
+                 urgency += 0.65 * Urgency.priorityCoefficient;
+                 break;
+             case Priority.None:
+                 urgency += 0.325 * Urgency.priorityCoefficient;
+                 break;
+             // no modification for "Low" priority
+-            case Priority.Lowest:
++            case Priority.Wishlist:
+                 urgency -= 0.3 * Urgency.priorityCoefficient;
+                 break;
+         }
+diff --git a/src/TaskSerializer/DataviewTaskSerializer.ts b/src/TaskSerializer/DataviewTaskSerializer.ts
+index d2a1cb69f..d52c2f214 100644
+--- a/src/TaskSerializer/DataviewTaskSerializer.ts
++++ b/src/TaskSerializer/DataviewTaskSerializer.ts
+@@ -62,11 +62,11 @@ function toInlineFieldRegex(innerFieldRegex: RegExp): RegExp {
+ export const DATAVIEW_SYMBOLS = {
+     // NEW_TASK_FIELD_EDIT_REQUIRED
+     prioritySymbols: {
+-        Highest: 'priority:: highest',
++        Critical: 'priority:: critical',
+         High: 'priority:: high',
+-        Medium: 'priority:: medium',
++        Normal: 'priority:: normal',
+         Low: 'priority:: low',
+-        Lowest: 'priority:: lowest',
++        Wishlist: 'priority:: wishlist',
+         None: '',
+     },
+     startDateSymbol: 'start::',
+@@ -80,7 +80,7 @@ export const DATAVIEW_SYMBOLS = {
+     idSymbol: 'id::',
+     dependsOnSymbol: 'dependsOn::',
+     TaskFormatRegularExpressions: {
+-        priorityRegex: toInlineFieldRegex(/priority:: *(highest|high|medium|low|lowest)/),
++        priorityRegex: toInlineFieldRegex(/priority:: *(critical|high|normal|low|wishlist)/),
+         startDateRegex: toInlineFieldRegex(/start:: *(\d{4}-\d{2}-\d{2})/),
+         createdDateRegex: toInlineFieldRegex(/created:: *(\d{4}-\d{2}-\d{2})/),
+         scheduledDateRegex: toInlineFieldRegex(/scheduled:: *(\d{4}-\d{2}-\d{2})/),
+diff --git a/src/TaskSerializer/DefaultTaskSerializer.ts b/src/TaskSerializer/DefaultTaskSerializer.ts
+index fd5ae5dae..931d4fc2b 100644
+--- a/src/TaskSerializer/DefaultTaskSerializer.ts
++++ b/src/TaskSerializer/DefaultTaskSerializer.ts
+@@ -16,11 +16,11 @@ import type { TaskDetails, TaskSerializer } from '.';
+ export interface DefaultTaskSerializerSymbols {
+     // NEW_TASK_FIELD_EDIT_REQUIRED
+     readonly prioritySymbols: {
+-        Highest: string;
++        Critical: string;
+         High: string;
+-        Medium: string;
++        Normal: string;
+         Low: string;
+-        Lowest: string;
++        Wishlist: string;
+         None: string;
+     };
+     readonly startDateSymbol: string;
+@@ -85,11 +85,11 @@ function fieldRegex(symbols: string, valueRegexString: string) {
+ export const DEFAULT_SYMBOLS: DefaultTaskSerializerSymbols = {
+     // NEW_TASK_FIELD_EDIT_REQUIRED
+     prioritySymbols: {
+-        Highest: '🔺',
+-        High: '⏫',
+-        Medium: '🔼',
+-        Low: '🔽',
+-        Lowest: '⏬',
++        Critical: '🔥',
++        High: '🚨',
++        Normal: '🟢',
++        Low: '💤',
++        Wishlist: '🔮',
+         None: '',
+     },
+     startDateSymbol: '🛫',
+@@ -103,7 +103,9 @@ export const DEFAULT_SYMBOLS: DefaultTaskSerializerSymbols = {
+     dependsOnSymbol: '⛔',
+     idSymbol: '🆔',
+     TaskFormatRegularExpressions: {
+-        priorityRegex: fieldRegex('(🔺|⏫|🔼|🔽|⏬)', ''),
++        // Custom: priority regex intentionally has no trailing `$` so the priority
++        // emoji can be matched anywhere on the line, not strictly at the end.
++        priorityRegex: /([🔥🚨🟢💤🔮])\uFE0F?/u,
+         startDateRegex: dateFieldRegex('🛫'),
+         createdDateRegex: dateFieldRegex('➕'),
+         scheduledDateRegex: dateFieldRegex('(?:⏳|⌛)'),
+@@ -194,16 +196,16 @@ export class DefaultTaskSerializer implements TaskSerializer {
+             case TaskLayoutComponent.Priority: {
+                 let priority: string = '';
+ 
+-                if (task.priority === Priority.Highest) {
+-                    priority = ' ' + prioritySymbols.Highest;
++                if (task.priority === Priority.Critical) {
++                    priority = ' ' + prioritySymbols.Critical;
+                 } else if (task.priority === Priority.High) {
+                     priority = ' ' + prioritySymbols.High;
+-                } else if (task.priority === Priority.Medium) {
+-                    priority = ' ' + prioritySymbols.Medium;
++                } else if (task.priority === Priority.Normal) {
++                    priority = ' ' + prioritySymbols.Normal;
+                 } else if (task.priority === Priority.Low) {
+                     priority = ' ' + prioritySymbols.Low;
+-                } else if (task.priority === Priority.Lowest) {
+-                    priority = ' ' + prioritySymbols.Lowest;
++                } else if (task.priority === Priority.Wishlist) {
++                    priority = ' ' + prioritySymbols.Wishlist;
+                 }
+                 return priority;
+             }
+@@ -250,16 +252,16 @@ export class DefaultTaskSerializer implements TaskSerializer {
+     protected parsePriority(p: string): Priority {
+         const { prioritySymbols } = this.symbols;
+         switch (p) {
+-            case prioritySymbols.Lowest:
+-                return Priority.Lowest;
++            case prioritySymbols.Wishlist:
++                return Priority.Wishlist;
+             case prioritySymbols.Low:
+                 return Priority.Low;
+-            case prioritySymbols.Medium:
+-                return Priority.Medium;
++            case prioritySymbols.Normal:
++                return Priority.Normal;
+             case prioritySymbols.High:
+                 return Priority.High;
+-            case prioritySymbols.Highest:
+-                return Priority.Highest;
++            case prioritySymbols.Critical:
++                return Priority.Critical;
+             default:
+                 return Priority.None;
+         }
+diff --git a/src/lib/PriorityTools.ts b/src/lib/PriorityTools.ts
+index dcd59e3f1..aff2b8064 100644
+--- a/src/lib/PriorityTools.ts
++++ b/src/lib/PriorityTools.ts
+@@ -10,22 +10,22 @@ export class PriorityTools {
+         let priorityName = 'ERROR';
+         switch (priority) {
+             case Priority.High:
+-                priorityName = 'High';
++                priorityName = '🚨 High';
+                 break;
+-            case Priority.Highest:
+-                priorityName = 'Highest';
++            case Priority.Critical:
++                priorityName = '🔥 Critical';
+                 break;
+-            case Priority.Medium:
+-                priorityName = 'Medium';
++            case Priority.Normal:
++                priorityName = '🟢 Normal';
+                 break;
+             case Priority.None:
+                 priorityName = 'None';
+                 break;
+             case Priority.Low:
+-                priorityName = 'Low';
++                priorityName = '💤 Low';
+                 break;
+-            case Priority.Lowest:
+-                priorityName = 'Lowest';
++            case Priority.Wishlist:
++                priorityName = '🔮 Wishlist';
+                 break;
+         }
+         return priorityName;
+@@ -37,7 +37,7 @@ export class PriorityTools {
+      * @see priorityNameUsingNone
+      */
+     public static priorityNameUsingNormal(priority: Priority) {
+-        return PriorityTools.priorityNameUsingNone(priority).replace('None', 'Normal');
++        return PriorityTools.priorityNameUsingNone(priority).replace('None', 'No');
+     }
+ 
+     /**
+@@ -51,16 +51,16 @@ export class PriorityTools {
+      */
+     public static priorityValue(priority: string): Priority {
+         switch (priority.toLowerCase()) {
+-            case 'lowest':
+-                return Priority.Lowest;
++            case 'wishlist':
++                return Priority.Wishlist;
+             case 'low':
+                 return Priority.Low;
+-            case 'medium':
+-                return Priority.Medium;
++            case 'normal':
++                return Priority.Normal;
+             case 'high':
+                 return Priority.High;
+-            case 'highest':
+-                return Priority.Highest;
++            case 'critical':
++                return Priority.Critical;
+             default:
+                 return Priority.None;
+         }
+diff --git a/src/lib/PropertyCategory.ts b/src/lib/PropertyCategory.ts
+index 9191cc927..026ec00e5 100644
+--- a/src/lib/PropertyCategory.ts
++++ b/src/lib/PropertyCategory.ts
+@@ -3,7 +3,7 @@
+  *
+  * A convention has been adopted in the Tasks grouping code to use commented-out numbers to control
+  * the sort order in group headings for things like {@link Priority}, which we want to
+- * sort from {@link Priority.Highest} to {@link Priority.Lowest}, instead of alphabetically.
++ * sort from {@link Priority.Critical} to {@link Priority.Wishlist}, instead of alphabetically.
+  *
+  * This class provides a way to store a {@link name} and a {@link sortOrder}, from which {@link groupText}
+  * can be constructed.
+diff --git a/src/ui/EditInstructions/PriorityInstructions.ts b/src/ui/EditInstructions/PriorityInstructions.ts
+index f2ba71c18..d73cc4214 100644
+--- a/src/ui/EditInstructions/PriorityInstructions.ts
++++ b/src/ui/EditInstructions/PriorityInstructions.ts
+@@ -42,12 +42,12 @@ export class SetPriority implements TaskEditingInstruction {
+  */
+ export function allPriorityInstructions() {
+     const allPriorities = [
+-        Priority.Highest,
++        Priority.Critical,
+         Priority.High,
+-        Priority.Medium,
++        Priority.Normal,
+         Priority.None,
+         Priority.Low,
+-        Priority.Lowest,
++        Priority.Wishlist,
+     ];
+     const instructions = [];
+     for (const priority of allPriorities) {
+diff --git a/src/ui/EditableTask.ts b/src/ui/EditableTask.ts
+index 25c60b325..f043c2425 100644
+--- a/src/ui/EditableTask.ts
++++ b/src/ui/EditableTask.ts
+@@ -90,16 +90,16 @@ export class EditableTask {
+             description != task.description || !GlobalFilter.getInstance().includedIn(task.description);
+ 
+         let priority = 'none';
+-        if (task.priority === Priority.Lowest) {
+-            priority = 'lowest';
++        if (task.priority === Priority.Wishlist) {
++            priority = 'wishlist';
+         } else if (task.priority === Priority.Low) {
+             priority = 'low';
+-        } else if (task.priority === Priority.Medium) {
+-            priority = 'medium';
++        } else if (task.priority === Priority.Normal) {
++            priority = 'normal';
+         } else if (task.priority === Priority.High) {
+             priority = 'high';
+-        } else if (task.priority === Priority.Highest) {
+-            priority = 'highest';
++        } else if (task.priority === Priority.Critical) {
++            priority = 'critical';
+         }
+ 
+         const blockedBy: Task[] = [];
+diff --git a/src/ui/PriorityEditor.svelte b/src/ui/PriorityEditor.svelte
+index e97a1033e..db0c9beb1 100644
+--- a/src/ui/PriorityEditor.svelte
++++ b/src/ui/PriorityEditor.svelte
+@@ -16,10 +16,10 @@
+         accessKeyIndex: number;
+     }[] = [
+         {
+-            value: 'lowest',
+-            label: 'Lowest',
+-            symbol: prioritySymbols.Lowest,
+-            accessKey: 'o',
++            value: 'wishlist',
++            label: 'Wishlist',
++            symbol: prioritySymbols.Wishlist,
++            accessKey: 'w',
+             accessKeyIndex: 1,
+         },
+         {
+@@ -31,16 +31,16 @@
+         },
+         {
+             value: 'none',
+-            label: 'Normal',
++            label: 'None',
+             symbol: prioritySymbols.None,
+-            accessKey: 'n',
++            accessKey: '0',
+             accessKeyIndex: 0,
+         },
+         {
+-            value: 'medium',
+-            label: 'Medium',
+-            symbol: prioritySymbols.Medium,
+-            accessKey: 'm',
++            value: 'normal',
++            label: 'Normal',
++            symbol: prioritySymbols.Normal,
++            accessKey: 'n',
+             accessKeyIndex: 0,
+         },
+         {
+@@ -51,10 +51,10 @@
+             accessKeyIndex: 0,
+         },
+         {
+-            value: 'highest',
+-            label: 'Highest',
+-            symbol: prioritySymbols.Highest,
+-            accessKey: 'i',
++            value: 'critical',
++            label: 'Critical',
++            symbol: prioritySymbols.Critical,
++            accessKey: 'c',
+             accessKeyIndex: 1,
+         },
+     ];
