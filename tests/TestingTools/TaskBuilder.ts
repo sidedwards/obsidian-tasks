@@ -125,7 +125,7 @@ export class TaskBuilder {
             .indentation('  ')
             .description('Do exercises')
             .tags(['#todo', '#health'])
-            .priority(Priority.Medium)
+            .priority(Priority.Normal)
             .createdDate('2023-07-01')
             .startDate('2023-07-02')
             .scheduledDate('2023-07-03')

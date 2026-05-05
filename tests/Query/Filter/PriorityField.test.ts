@@ -20,81 +20,81 @@ function testTaskFilterForTaskWithPriority(filter: string, priority: Priority, e
 describe('priority is', () => {
     it('priority is highest', () => {
         const filter = 'priority is highest';
-        testTaskFilterForTaskWithPriority(filter, Priority.Highest, true);
+        testTaskFilterForTaskWithPriority(filter, Priority.Critical, true);
         testTaskFilterForTaskWithPriority(filter, Priority.High, false);
-        testTaskFilterForTaskWithPriority(filter, Priority.Medium, false);
+        testTaskFilterForTaskWithPriority(filter, Priority.Normal, false);
         testTaskFilterForTaskWithPriority(filter, Priority.None, false);
         testTaskFilterForTaskWithPriority(filter, Priority.Low, false);
-        testTaskFilterForTaskWithPriority(filter, Priority.Lowest, false);
+        testTaskFilterForTaskWithPriority(filter, Priority.Wishlist, false);
     });
 
     it('priority is high', () => {
         const filter = 'priority is high';
-        testTaskFilterForTaskWithPriority(filter, Priority.Highest, false);
+        testTaskFilterForTaskWithPriority(filter, Priority.Critical, false);
         testTaskFilterForTaskWithPriority(filter, Priority.High, true);
-        testTaskFilterForTaskWithPriority(filter, Priority.Medium, false);
+        testTaskFilterForTaskWithPriority(filter, Priority.Normal, false);
         testTaskFilterForTaskWithPriority(filter, Priority.None, false);
         testTaskFilterForTaskWithPriority(filter, Priority.Low, false);
-        testTaskFilterForTaskWithPriority(filter, Priority.Lowest, false);
+        testTaskFilterForTaskWithPriority(filter, Priority.Wishlist, false);
     });
 
     it('priority is medium', () => {
         const filter = 'priority is medium';
-        testTaskFilterForTaskWithPriority(filter, Priority.Highest, false);
+        testTaskFilterForTaskWithPriority(filter, Priority.Critical, false);
         testTaskFilterForTaskWithPriority(filter, Priority.High, false);
-        testTaskFilterForTaskWithPriority(filter, Priority.Medium, true);
+        testTaskFilterForTaskWithPriority(filter, Priority.Normal, true);
         testTaskFilterForTaskWithPriority(filter, Priority.None, false);
         testTaskFilterForTaskWithPriority(filter, Priority.Low, false);
-        testTaskFilterForTaskWithPriority(filter, Priority.Lowest, false);
+        testTaskFilterForTaskWithPriority(filter, Priority.Wishlist, false);
     });
 
     it('priority is none', () => {
         const filter = 'priority is none';
-        testTaskFilterForTaskWithPriority(filter, Priority.Highest, false);
+        testTaskFilterForTaskWithPriority(filter, Priority.Critical, false);
         testTaskFilterForTaskWithPriority(filter, Priority.High, false);
-        testTaskFilterForTaskWithPriority(filter, Priority.Medium, false);
+        testTaskFilterForTaskWithPriority(filter, Priority.Normal, false);
         testTaskFilterForTaskWithPriority(filter, Priority.None, true);
         testTaskFilterForTaskWithPriority(filter, Priority.Low, false);
-        testTaskFilterForTaskWithPriority(filter, Priority.Lowest, false);
+        testTaskFilterForTaskWithPriority(filter, Priority.Wishlist, false);
     });
 
     it('priority is low', () => {
         const filter = 'priority is low';
-        testTaskFilterForTaskWithPriority(filter, Priority.Highest, false);
+        testTaskFilterForTaskWithPriority(filter, Priority.Critical, false);
         testTaskFilterForTaskWithPriority(filter, Priority.High, false);
-        testTaskFilterForTaskWithPriority(filter, Priority.Medium, false);
+        testTaskFilterForTaskWithPriority(filter, Priority.Normal, false);
         testTaskFilterForTaskWithPriority(filter, Priority.None, false);
         testTaskFilterForTaskWithPriority(filter, Priority.Low, true);
-        testTaskFilterForTaskWithPriority(filter, Priority.Lowest, false);
+        testTaskFilterForTaskWithPriority(filter, Priority.Wishlist, false);
     });
 
     it('priority is lowest', () => {
         const filter = 'priority is lowest';
-        testTaskFilterForTaskWithPriority(filter, Priority.Highest, false);
+        testTaskFilterForTaskWithPriority(filter, Priority.Critical, false);
         testTaskFilterForTaskWithPriority(filter, Priority.High, false);
-        testTaskFilterForTaskWithPriority(filter, Priority.Medium, false);
+        testTaskFilterForTaskWithPriority(filter, Priority.Normal, false);
         testTaskFilterForTaskWithPriority(filter, Priority.None, false);
         testTaskFilterForTaskWithPriority(filter, Priority.Low, false);
-        testTaskFilterForTaskWithPriority(filter, Priority.Lowest, true);
+        testTaskFilterForTaskWithPriority(filter, Priority.Wishlist, true);
     });
 });
 
 describe('priority above', () => {
     it('priority above none', () => {
         const filter = 'priority above none';
-        testTaskFilterForTaskWithPriority(filter, Priority.Lowest, false);
+        testTaskFilterForTaskWithPriority(filter, Priority.Wishlist, false);
         testTaskFilterForTaskWithPriority(filter, Priority.Low, false);
         testTaskFilterForTaskWithPriority(filter, Priority.None, false);
-        testTaskFilterForTaskWithPriority(filter, Priority.Medium, true);
+        testTaskFilterForTaskWithPriority(filter, Priority.Normal, true);
         testTaskFilterForTaskWithPriority(filter, Priority.High, true);
-        testTaskFilterForTaskWithPriority(filter, Priority.Highest, true);
+        testTaskFilterForTaskWithPriority(filter, Priority.Critical, true);
     });
 });
 
 describe('priority below', () => {
     it('priority below none', () => {
         const filter = 'priority below none';
-        testTaskFilterForTaskWithPriority(filter, Priority.Lowest, true);
+        testTaskFilterForTaskWithPriority(filter, Priority.Wishlist, true);
         testTaskFilterForTaskWithPriority(filter, Priority.Low, true);
         testTaskFilterForTaskWithPriority(filter, Priority.None, false);
     });
@@ -102,17 +102,17 @@ describe('priority below', () => {
 
 describe('priority is not', () => {
     it.each([
-        ['lowest', Priority.Lowest, false],
+        ['lowest', Priority.Wishlist, false],
         ['lowest', Priority.Low, true],
         ['low', Priority.Low, false],
         ['low', Priority.None, true],
         ['none', Priority.None, false],
-        ['none', Priority.Medium, true],
+        ['none', Priority.Normal, true],
         ['medium', Priority.None, true],
-        ['medium', Priority.Medium, false],
-        ['high', Priority.Medium, true],
+        ['medium', Priority.Normal, false],
+        ['high', Priority.Normal, true],
         ['high', Priority.High, false],
-        ['highest', Priority.Highest, false],
+        ['highest', Priority.Critical, false],
         ['highest', Priority.High, true],
     ])('priority is not %s (with %s)', (filter: string, input: Priority, expected: boolean) => {
         // TODO Use name of input priority instead of
@@ -178,11 +178,11 @@ describe('sorting by priority', () => {
         // Assert
         // This tests each adjacent pair of priority values, in descending order,
         // to prove that sorting of all combinations will be correct.
-        expectTaskComparesBefore(sorter, with_priority(Priority.Highest), with_priority(Priority.High));
-        expectTaskComparesBefore(sorter, with_priority(Priority.High), with_priority(Priority.Medium));
-        expectTaskComparesBefore(sorter, with_priority(Priority.Medium), with_priority(Priority.None));
+        expectTaskComparesBefore(sorter, with_priority(Priority.Critical), with_priority(Priority.High));
+        expectTaskComparesBefore(sorter, with_priority(Priority.High), with_priority(Priority.Normal));
+        expectTaskComparesBefore(sorter, with_priority(Priority.Normal), with_priority(Priority.None));
         expectTaskComparesBefore(sorter, with_priority(Priority.None), with_priority(Priority.Low));
-        expectTaskComparesBefore(sorter, with_priority(Priority.Low), with_priority(Priority.Lowest));
+        expectTaskComparesBefore(sorter, with_priority(Priority.Low), with_priority(Priority.Wishlist));
 
         expectTaskComparesEqual(sorter, with_priority(Priority.None), with_priority(Priority.None));
     });
@@ -191,7 +191,7 @@ describe('sorting by priority', () => {
         // Single example just to prove reverse works.
         // (There's no need to repeat all the examples above)
         const sorter = new PriorityField().createReverseSorter();
-        expectTaskComparesAfter(sorter, with_priority(Priority.High), with_priority(Priority.Medium));
+        expectTaskComparesAfter(sorter, with_priority(Priority.High), with_priority(Priority.Normal));
     });
 });
 

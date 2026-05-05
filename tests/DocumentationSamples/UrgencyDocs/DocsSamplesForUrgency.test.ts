@@ -126,12 +126,12 @@ describe('UrgencyTable', () => {
         ]);
 
         table += property([
-            [cell('Priority', 6), cell('Highest'), urgencyCell(calcForPriority(Priority.Highest))],
+            [cell('Priority', 6), cell('Highest'), urgencyCell(calcForPriority(Priority.Critical))],
             [cell('High'), urgencyCell(calcForPriority(Priority.High))],
-            [cell('Medium'), urgencyCell(calcForPriority(Priority.Medium))],
+            [cell('Medium'), urgencyCell(calcForPriority(Priority.Normal))],
             [cell('None'), urgencyCell(calcForPriority(Priority.None), 2)],
             [cell('Low'), urgencyCell(calcForPriority(Priority.Low))],
-            [cell('Lowest'), urgencyCell(calcForPriority(Priority.Lowest))],
+            [cell('Lowest'), urgencyCell(calcForPriority(Priority.Wishlist))],
         ]);
 
         table += property([

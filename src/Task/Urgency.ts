@@ -43,20 +43,20 @@ export class Urgency {
         }
 
         switch (task.priority) {
-            case Priority.Highest:
+            case Priority.Critical:
                 urgency += 1.5 * Urgency.priorityCoefficient;
                 break;
             case Priority.High:
                 urgency += 1.0 * Urgency.priorityCoefficient;
                 break;
-            case Priority.Medium:
+            case Priority.Normal:
                 urgency += 0.65 * Urgency.priorityCoefficient;
                 break;
             case Priority.None:
                 urgency += 0.325 * Urgency.priorityCoefficient;
                 break;
             // no modification for "Low" priority
-            case Priority.Lowest:
+            case Priority.Wishlist:
                 urgency -= 0.3 * Urgency.priorityCoefficient;
                 break;
         }

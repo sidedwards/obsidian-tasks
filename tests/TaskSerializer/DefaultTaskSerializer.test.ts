@@ -144,7 +144,7 @@ describe.each(symbolMap)("DefaultTaskSerializer with '$taskFormat' symbols", ({ 
 
         describe('should parse priorities', () => {
             it('should parse a priority', () => {
-                const priorities = ['Highest', 'High', 'None', 'Medium', 'Low', 'Lowest'] as const;
+                const priorities = ['Critical', 'High', 'None', 'Normal', 'Low', 'Wishlist'] as const;
                 for (const p of priorities) {
                     const prioritySymbol = symbols.prioritySymbols[p];
                     const priority = Priority[p];
@@ -288,7 +288,7 @@ describe.each(symbolMap)("DefaultTaskSerializer with '$taskFormat' symbols", ({ 
         });
 
         it('should serialize a Highest, High, Medium, Low and Lowest priority', () => {
-            const priorities = ['Highest', 'High', 'Medium', 'Low', 'Lowest'] as const;
+            const priorities = ['Critical', 'High', 'Normal', 'Low', 'Wishlist'] as const;
             for (const p of priorities) {
                 const task = new TaskBuilder().priority(Priority[p]).description('').build();
                 const serialized = serialize(task);

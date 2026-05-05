@@ -46,12 +46,12 @@ describe('PriorityMenu', () => {
         expect(TestableTaskSaver.taskBeingOverwritten!.priority).toEqual(Priority.None);
 
         expect(TestableTaskSaver.tasksBeingSaved!.length).toEqual(1);
-        expect(TestableTaskSaver.tasksBeingSaved![0].priority).toEqual(Priority.Highest);
+        expect(TestableTaskSaver.tasksBeingSaved![0].priority).toEqual(Priority.Critical);
     });
 
     it('should not modify task, if current priority selected', () => {
         // Arrange
-        const task = new TaskBuilder().priority(Priority.Highest).build();
+        const task = new TaskBuilder().priority(Priority.Critical).build();
 
         // Act
         const menu = new PriorityMenu(task, TestableTaskSaver.testableTaskSaver);

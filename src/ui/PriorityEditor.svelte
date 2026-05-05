@@ -16,10 +16,10 @@
         accessKeyIndex: number;
     }[] = [
         {
-            value: 'lowest',
-            label: 'Lowest',
-            symbol: prioritySymbols.Lowest,
-            accessKey: 'o',
+            value: 'wishlist',
+            label: 'Wishlist',
+            symbol: prioritySymbols.Wishlist,
+            accessKey: 'w',
             accessKeyIndex: 1,
         },
         {
@@ -31,16 +31,16 @@
         },
         {
             value: 'none',
-            label: 'Normal',
+            label: 'None',
             symbol: prioritySymbols.None,
-            accessKey: 'n',
+            accessKey: '0',
             accessKeyIndex: 0,
         },
         {
-            value: 'medium',
-            label: 'Medium',
-            symbol: prioritySymbols.Medium,
-            accessKey: 'm',
+            value: 'normal',
+            label: 'Normal',
+            symbol: prioritySymbols.Normal,
+            accessKey: 'n',
             accessKeyIndex: 0,
         },
         {
@@ -51,10 +51,10 @@
             accessKeyIndex: 0,
         },
         {
-            value: 'highest',
-            label: 'Highest',
-            symbol: prioritySymbols.Highest,
-            accessKey: 'i',
+            value: 'critical',
+            label: 'Critical',
+            symbol: prioritySymbols.Critical,
+            accessKey: 'c',
             accessKeyIndex: 1,
         },
     ];

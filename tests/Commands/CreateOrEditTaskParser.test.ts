@@ -89,7 +89,7 @@ describe('CreateOrEditTaskParser - task recognition', () => {
         expect(task.path).toStrictEqual('a/b/c.md');
 
         // NEW_TASK_FIELD_EDIT_REQUIRED
-        expect(task.priority).toStrictEqual(Priority.Lowest);
+        expect(task.priority).toStrictEqual(Priority.Wishlist);
         expect(task.recurrenceRule).toStrictEqual('every 2 days');
         expect(task.createdDate).toEqualMoment(moment('2022-03-10'));
         expect(task.startDate).toEqualMoment(moment('2022-01-31'));

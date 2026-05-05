@@ -50,7 +50,7 @@ describe('All Priority Instructions', () => {
 
         // Assert
         expect(allInstructions.length).toBe(6);
-        expect(allInstructions[0].newPriority).toBe(Priority.Highest);
-        expect(allInstructions[5].newPriority).toBe(Priority.Lowest);
+        expect(allInstructions[0].newPriority).toBe(Priority.Critical);
+        expect(allInstructions[5].newPriority).toBe(Priority.Wishlist);
     });
 });

@@ -15,21 +15,21 @@ describe('priority naming', () => {
 
     it.each([
         // Normal cases
-        ['highest', Priority.Highest],
+        ['highest', Priority.Critical],
         ['high', Priority.High],
-        ['medium', Priority.Medium],
+        ['medium', Priority.Normal],
         ['none', Priority.None],
         ['normal', Priority.None],
         ['low', Priority.Low],
-        ['lowest', Priority.Lowest],
+        ['lowest', Priority.Wishlist],
 
         // Erroneous cases
         ['', Priority.None],
         ['invalid_priority_string!', Priority.None],
 
         // Priority search is case-insensitive
-        ['Highest', Priority.Highest],
-        ['highEst', Priority.Highest],
+        ['Highest', Priority.Critical],
+        ['highEst', Priority.Critical],
     ])('should get priority value for "%s"', (str, value) => {
         expect(PriorityTools.priorityValue(str)).toEqual(value);
     });

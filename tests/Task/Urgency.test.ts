@@ -78,12 +78,12 @@ describe('urgency - test time-of-day impact on due-date score', () => {
 describe('urgency - priority component', () => {
     it('should score correctly for priority', () => {
         const builder = new TaskBuilder();
-        testUrgency(builder.priority(Priority.Highest), 9.0);
+        testUrgency(builder.priority(Priority.Critical), 9.0);
         testUrgency(builder.priority(Priority.High), 6.0);
-        testUrgency(builder.priority(Priority.Medium), 3.9);
+        testUrgency(builder.priority(Priority.Normal), 3.9);
         testUrgency(builder.priority(Priority.None), 1.95);
         testUrgency(builder.priority(Priority.Low), 0.0);
-        testUrgency(builder.priority(Priority.Lowest), -1.8);
+        testUrgency(builder.priority(Priority.Wishlist), -1.8);
     });
 });
 

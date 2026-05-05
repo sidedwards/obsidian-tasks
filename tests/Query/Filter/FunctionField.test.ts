@@ -576,7 +576,7 @@ describe('FunctionField - grouping - example functions', () => {
     it('group by priority', () => {
         const line = 'group by function task.priority';
         const grouper = createGrouper(line);
-        toGroupTaskFromBuilder(grouper, new TaskBuilder().priority(Priority.Highest), ['0']);
+        toGroupTaskFromBuilder(grouper, new TaskBuilder().priority(Priority.Critical), ['0']);
     });
 
     it('group by status symbol', () => {

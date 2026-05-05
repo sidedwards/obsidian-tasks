@@ -42,12 +42,12 @@ export class SetPriority implements TaskEditingInstruction {
  */
 export function allPriorityInstructions() {
     const allPriorities = [
-        Priority.Highest,
+        Priority.Critical,
         Priority.High,
-        Priority.Medium,
+        Priority.Normal,
         Priority.None,
         Priority.Low,
-        Priority.Lowest,
+        Priority.Wishlist,
     ];
     const instructions = [];
     for (const priority of allPriorities) {

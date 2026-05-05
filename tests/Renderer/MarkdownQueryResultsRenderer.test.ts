@@ -16,7 +16,7 @@ afterEach(() => {
 describe('MarkdownQueryResultsRenderer tests', () => {
     it('should render single task', async () => {
         const { markdown } = await renderMarkdown('hide tree', [
-            new TaskBuilder().description('hello').priority(Priority.Medium).build(),
+            new TaskBuilder().description('hello').priority(Priority.Normal).build(),
         ]);
         expect(markdown).toMatchInlineSnapshot(`
             "
@@ -29,7 +29,7 @@ describe('MarkdownQueryResultsRenderer tests', () => {
         const source = 'hide tree';
         const { renderer, query } = createMarkdownRenderer(source);
 
-        const task = [new TaskBuilder().description('hello').priority(Priority.Medium).build()];
+        const task = [new TaskBuilder().description('hello').priority(Priority.Normal).build()];
 
         await renderer.renderQuery(State.Warm, query.applyQueryToTasks(task));
         const r1 = renderer.markdown;
@@ -42,7 +42,7 @@ describe('MarkdownQueryResultsRenderer tests', () => {
 
     it('should render two tasks', async () => {
         const { markdown } = await renderMarkdown('hide tree\nsort by priority reverse', [
-            new TaskBuilder().description('hello').priority(Priority.Medium).build(),
+            new TaskBuilder().description('hello').priority(Priority.Normal).build(),
             new TaskBuilder().description('bye').priority(Priority.High).build(),
         ]);
         expect(markdown).toMatchInlineSnapshot(`

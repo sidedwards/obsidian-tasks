@@ -10,22 +10,22 @@ export class PriorityTools {
         let priorityName = 'ERROR';
         switch (priority) {
             case Priority.High:
-                priorityName = 'High';
+                priorityName = '🚨 High';
                 break;
-            case Priority.Highest:
-                priorityName = 'Highest';
+            case Priority.Critical:
+                priorityName = '🔥 Critical';
                 break;
-            case Priority.Medium:
-                priorityName = 'Medium';
+            case Priority.Normal:
+                priorityName = '🟢 Normal';
                 break;
             case Priority.None:
                 priorityName = 'None';
                 break;
             case Priority.Low:
-                priorityName = 'Low';
+                priorityName = '💤 Low';
                 break;
-            case Priority.Lowest:
-                priorityName = 'Lowest';
+            case Priority.Wishlist:
+                priorityName = '🔮 Wishlist';
                 break;
         }
         return priorityName;
@@ -37,7 +37,7 @@ export class PriorityTools {
      * @see priorityNameUsingNone
      */
     public static priorityNameUsingNormal(priority: Priority) {
-        return PriorityTools.priorityNameUsingNone(priority).replace('None', 'Normal');
+        return PriorityTools.priorityNameUsingNone(priority).replace('None', 'No');
     }
 
     /**
@@ -51,16 +51,16 @@ export class PriorityTools {
      */
     public static priorityValue(priority: string): Priority {
         switch (priority.toLowerCase()) {
-            case 'lowest':
-                return Priority.Lowest;
+            case 'wishlist':
+                return Priority.Wishlist;
             case 'low':
                 return Priority.Low;
-            case 'medium':
-                return Priority.Medium;
+            case 'normal':
+                return Priority.Normal;
             case 'high':
                 return Priority.High;
-            case 'highest':
-                return Priority.Highest;
+            case 'critical':
+                return Priority.Critical;
             default:
                 return Priority.None;
         }

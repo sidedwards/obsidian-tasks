@@ -1661,8 +1661,8 @@ describe('identicalTo', () => {
     });
 
     it('should check priority', () => {
-        const lhs = new TaskBuilder().priority(Priority.Medium);
-        expect(lhs).toBeIdenticalTo(new TaskBuilder().priority(Priority.Medium));
+        const lhs = new TaskBuilder().priority(Priority.Normal);
+        expect(lhs).toBeIdenticalTo(new TaskBuilder().priority(Priority.Normal));
         expect(lhs).not.toBeIdenticalTo(new TaskBuilder().priority(Priority.None));
     });
 

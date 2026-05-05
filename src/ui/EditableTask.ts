@@ -90,16 +90,16 @@ export class EditableTask {
             description != task.description || !GlobalFilter.getInstance().includedIn(task.description);
 
         let priority = 'none';
-        if (task.priority === Priority.Lowest) {
-            priority = 'lowest';
+        if (task.priority === Priority.Wishlist) {
+            priority = 'wishlist';
         } else if (task.priority === Priority.Low) {
             priority = 'low';
-        } else if (task.priority === Priority.Medium) {
-            priority = 'medium';
+        } else if (task.priority === Priority.Normal) {
+            priority = 'normal';
         } else if (task.priority === Priority.High) {
             priority = 'high';
-        } else if (task.priority === Priority.Highest) {
-            priority = 'highest';
+        } else if (task.priority === Priority.Critical) {
+            priority = 'critical';
         }
 
         const blockedBy: Task[] = [];
